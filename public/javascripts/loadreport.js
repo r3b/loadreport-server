@@ -64,11 +64,13 @@ var confess = {
             },this.performance.start);
         },
         onLoadStarted: function (page, config) {
+            console.log("load started");
             if (!this.performance.start) {
                 this.performance.start = new Date().getTime();
             }
         },
         onResourceRequested: function (page, config, request) {
+            console.log("resource requested: %s", request.url);
             var now = new Date().getTime();
             this.performance.resources[request.id] = {
                 id: request.id,
@@ -371,6 +373,7 @@ var confess = {
             if (argument.oneof && argument.oneof.indexOf(config[argument.name])==-1) {
                 console.log('"' + argument.name + '" argument must be one of: ' + argument.oneof.join(', '));
                 ok = false;
+                phantom.exit();
             }
             a++;
         });

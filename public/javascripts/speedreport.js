@@ -45,7 +45,7 @@ page.open(address, function (status) {
             console.log("last chance");
             window.onload=function(){console.log(Date.now())};
         });
-        printToFile(JSON.stringify(pageInfo, undefined, 4));
+        printToFile(JSON.stringify(pageInfo));
         //page.render(output);
         /*for(var r in requests){
          var start=Date.parse(requests[r].time),end=Date.parse(responses[r].time)
@@ -66,22 +66,22 @@ function printToFile(data) {
         fileid = phantom.args[1];
     }
 
-    myfile = 'speedreports/' + fileid + '.' + extension;
+    //myfile = 'speedreports/' + fileid + '.' + extension;
     myjson = fileid;
 
 
 
-    if(fs.exists(myfile)){
+    /*if(fs.exists(myfile)){
         fs.remove(myfile);
-    }
+    }*/
     //write the headers and first line
     try {
-        f = fs.open(myfile, "w");
-        g = fs.open('speedreports/' + myjson  + '.js', "w");
-        g.writeLine('var reportdata = ' + data + ';');
+        //f = fs.open(myfile, "w");
+        g = fs.open(myjson, "w");
+        g.writeLine(data);
         g.close();
 
-        if(!fs.exists('speedreport.html')){
+        /*if(!fs.exists('speedreport.html')){
             html = fs.read('loadreport/speedreport.html');
         }else{
             html = fs.read('speedreport.html');
@@ -101,7 +101,7 @@ function printToFile(data) {
                     '</body></html>');
 
 
-        f.close();
+        f.close();*/
 
     } catch (e) {
         console.log("problem writing to file",e);
