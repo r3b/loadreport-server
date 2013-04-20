@@ -4,8 +4,10 @@
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=9;IE=8;IE=7;">
     <script src="/javascripts/libs/knockout-2.1.0.js"></script>
-    <script src="/javascripts/libs/jquery-1.7.2.min.js"></script>
+    <script src="/javascripts/libs/jquery-1.9.1.js"></script>
+    <script src="/javascripts/libs/jquery-ui-1.10.2.custom.min.js"></script>
     <script src="/javascripts/libs/jquery.sparkline.min.js"></script>
+    <link rel="stylesheet" href='/stylesheets/black-tie/jquery-ui-1.10.2.custom.min.css' />
 </head>
 <body>
 <style>
@@ -21,8 +23,10 @@
     }
 
     span.url {
-        display: inline;
+        display: inline-block;
         overflow: hidden;
+        white-space: nowrap;
+        max-width:80%;
     }
 
     .bigGraph {
@@ -33,7 +37,7 @@
     }
 
     .graphs {
-        width: 60%;
+        width: 95%;
         float: left;
     }
 
@@ -41,61 +45,73 @@
         width: 30%;
         float: left;
     }
+    .ilb{
+        display:inline-block;
+        float:left;
+    }
 </style>
-<h1 data-bind="text:url"></h1>
-
-<div class="graphs">
-    <div class="bigGraph">
-        <h2>Stacked</h2>
-        <h4>Size, in bytes, of the download</h4>
-        <span data-bind="sparkline: stacked, sparklineOptions:{type: 'bar', width:'100%', height: 100, barWidth:'10px',barSpacing:'1px',tooltipFormatter: tooltipFormatterStacked}">Loading...</span>
-    </div>
-    <div class="bigGraph">
-        <h2>Blocking</h2>
-        <h4>Time spend blocking before the request is made</h4>
-        <span data-bind="sparkline: blockings, sparklineOptions:{type: 'bar', barColor:'#3366cc', width:'100%', height: 100, barWidth:'10px',barSpacing:'1px', tooltipFormatter: tooltipFormatter}">Loading...</span>
-    </div>
-    <div class="bigGraph">
-        <h2>Latency</h2>
-        <h4>Time elapsed from when the request is made until the initial response is received</h4>
-        <span data-bind="sparkline: latencies, sparklineOptions:{type: 'bar', barColor:'#dc3912', width:'100%', height: 100, barWidth:'10px',barSpacing:'1px', tooltipFormatter: tooltipFormatter}">Loading...</span>
-    </div>
-    <div class="bigGraph">
-        <h2>Download Time</h2>
-        <h4>Time elapsed from the first byte received to the last byte received </h4>
-        <span data-bind="sparkline: downloadTimes, sparklineOptions:{type: 'bar', barColor:'#ff9900', width:'100%', height: 100, barWidth:'10px',barSpacing:'1px', tooltipFormatter: tooltipFormatter}">Loading...</span>
-    </div>
-    <div class="bigGraph">
-        <h2>Asset duration</h2>
-        <h4>Total elapsed time from request to completion</h4>
-        <span data-bind="sparkline: durations, sparklineOptions:{type: 'bar', barColor:'#109618', width:'100%', height: 100, barWidth:'10px',barSpacing:'1px', tooltipFormatter: tooltipFormatter}">Loading...</span>
-    </div>
-    <div class="bigGraph">
-        <h2>Asset size</h2>
-        <h4>Size, in bytes, of the download</h4>
-        <span data-bind="sparkline: sizes, sparklineOptions:{type: 'bar', width:'100%', height: 100, barWidth:'10px',barSpacing:'1px', tooltipFormatter: tooltipFormatterBytes}">Loading...</span>
+<h1>Speed report for <span data-bind="text:url"></span></h1>
+<div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">Stacked</a></li>
+        <li><a href="#tabs-2">Blocking</a></li>
+        <li><a href="#tabs-3">Latency</a></li>
+        <li><a href="#tabs-4">Download Time</a></li>
+        <li><a href="#tabs-5">Asset Duration</a></li>
+        <li><a href="#tabs-6">Asset Size</a></li>
+        <li><a href="#tabs-7">Individual Asset Breakdown</a></li>
+    </ul>
+    <div class="graphs">
+        <div class="bigGraph" id="tabs-1">
+            <h2>Stacked</h2>
+            <h4>Size, in bytes, of the download</h4>
+            <span data-bind="sparkline: stacked, sparklineOptions:{type: 'bar', width:'100%', height: 100, barWidth:'10px',barSpacing:'1px',tooltipFormatter: tooltipFormatterStacked}">Loading...</span>
+        </div>
+        <div class="bigGraph" id="tabs-2">
+            <h2>Blocking</h2>
+            <h4>Time spend blocking before the request is made</h4>
+            <span data-bind="sparkline: blockings, sparklineOptions:{type: 'bar', barColor:'#3366cc', width:'100%', height: 100, barWidth:'10px',barSpacing:'1px', tooltipFormatter: tooltipFormatter}">Loading...</span>
+        </div>
+        <div class="bigGraph" id="tabs-3">
+            <h2>Latency</h2>
+            <h4>Time elapsed from when the request is made until the initial response is received</h4>
+            <span data-bind="sparkline: latencies, sparklineOptions:{type: 'bar', barColor:'#dc3912', width:'100%', height: 100, barWidth:'10px',barSpacing:'1px', tooltipFormatter: tooltipFormatter}">Loading...</span>
+        </div>
+        <div class="bigGraph" id="tabs-4">
+            <h2>Download Time</h2>
+            <h4>Time elapsed from the first byte received to the last byte received </h4>
+            <span data-bind="sparkline: downloadTimes, sparklineOptions:{type: 'bar', barColor:'#ff9900', width:'100%', height: 100, barWidth:'10px',barSpacing:'1px', tooltipFormatter: tooltipFormatter}">Loading...</span>
+        </div>
+        <div class="bigGraph" id="tabs-5">
+            <h2>Asset duration</h2>
+            <h4>Total elapsed time from request to completion</h4>
+            <span data-bind="sparkline: durations, sparklineOptions:{type: 'bar', barColor:'#109618', width:'100%', height: 100, barWidth:'10px',barSpacing:'1px', tooltipFormatter: tooltipFormatter}">Loading...</span>
+        </div>
+        <div class="bigGraph"  id="tabs-6">
+            <h2>Asset size</h2>
+            <h4>Size, in bytes, of the download</h4>
+            <span data-bind="sparkline: sizes, sparklineOptions:{type: 'bar', width:'100%', height: 100, barWidth:'10px',barSpacing:'1px', tooltipFormatter: tooltipFormatterBytes}">Loading...</span>
+        </div>
+        <div  id="tabs-7">
+            <h2>Individual Asset breakdown</h2>
+            <div data-bind="foreach:assets()">
+                <div class="asset_graph">
+                    <span class="graph ilb" data-bind="sparkline: [1000, $data.blocking()+$data.duration(),$root.duration(), $data.latency()+$data.duration(), $data.latency()+$data.downloadTime(),$data.latency()], 
+                        sparklineOptions:{type: 'bullet', chartRangeMinX:$root.startTime(), chartRangeMaxX:$root.endTime(),  width: '120px', height: '20px', rangeColors:['#ffffff','#dc3912','#ff9900','#109618'],tooltipFormatter:function(el, o, v){return $data.tooltip()+'<br/>'+JSON.stringify(v);}}"></span>
+                    <span data-bind="text:id" class=""></span>:&nbsp;
+                    <span data-bind="text:url" class="url"></span>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-<div class="" style="float:none;clear:both;">&nbsp;</div>
-<h2>Individual Asset breakdown</h2>
-
-<div data-bind="foreach:assets()">
-    <div class="asset_graph">
-				<span class="graph" data-bind="sparkline: [1000, $data.blocking()+$data.duration(),$root.duration(), $data.latency()+$data.duration(), $data.latency()+$data.downloadTime(),$data.latency()], 
-					sparklineOptions:{type: 'bullet', chartRangeMinX:$root.startTime(), chartRangeMaxX:$root.endTime(),  width: 300, height: '20px', rangeColors:['#ffffff','#dc3912','#ff9900','#109618'],tooltipFormatter:function(el, o, v){return $data.tooltip()+'<br/>'+JSON.stringify(v);}}"></span>
-        <span data-bind="text:id" class=""></span>:&nbsp;
-        <span data-bind="text:url" class="url"></span>
-        <!--<span data-bind="text:duration" class="time_long"></span>
-                  <span data-bind="text:latency" class="time_long"></span>
-                  <time data-bind="text:startTime" class="time_long"></time>
-                  <time data-bind="text:endTime" class="time_long"></time>-->
-    </div>
-</div>
+    <div class="" style="float:none;clear:both;">&nbsp;</div>
 <script>
-$j(document).ready(function () {
+jQuery(document).ready(function () {
     window.reportdata={{{reportdata}}};
     var p = new PageModel(reportdata);
     ko.applyBindings(p);
+    $( "#tabs" ).tabs();
 });
 </script>
 <script>
@@ -148,7 +164,7 @@ $j(document).ready(function () {
         update:function (element, valueAccessor, allBindingsAccessor, viewModel) {
             var value = ko.utils.unwrapObservable(valueAccessor());
             var options = allBindingsAccessor().sparklineOptions || {};
-            $j(element).sparkline(value, options);
+            jQuery(element).sparkline(value, options);
         }
     };
     function HTTPEventModel(r) {
@@ -324,3 +340,5 @@ $j(document).ready(function () {
         "url":"http://www.cnn.com/"
     });
 </script>
+</body>
+</html>
