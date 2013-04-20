@@ -12,7 +12,7 @@ var childProcess = require('child_process')
 	, util = require('util');
 
 exports.index = function(req, res){
-	var url=req.param('url')||'http://www.cnn.com'
+	var url=req.param('url')||req.get('Referrer')||'http://www.cnn.com'
 		, task = req.param('task')||'performance'
 		, contentType='json';
 
