@@ -81,6 +81,11 @@
             return that.endTime() - that.startTime()
         });
 
+        for (var a = 0, al = assets.length; a < al; a++) {
+            var raa = r.assets[a], asset = new AssetModel(raa.request, raa.response);
+            asset.blocking(asset.startTime() - that.startTime());
+            that.assets.push(asset);
+        }
         that.urls = ko.computed(function () {
             return that.assets().reduce(function (result, current, index, array) {
                 result.push(current.url());
@@ -98,9 +103,17 @@
                 }else{
                     result[t]=1;
                 }
-                console.log(t,result);
                 return result;
             }, {})
+        });
+        that.contentTypesKeys=ko.computed(function () {
+            return Object.keys(that.contentTypes());
+        });
+        that.contentTypesValues=ko.computed(function () {
+            return that.contentTypesKeys().reduce(function (result, current, index, array) {
+                result.push(that.contentTypes()[current]);
+                return result;
+            }, [])
         });
         that.blockings = ko.computed(function () {
             return that.assets().reduce(function (result, current, index, array) {
