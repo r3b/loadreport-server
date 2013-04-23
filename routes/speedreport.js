@@ -12,6 +12,13 @@ var childProcess = require('child_process')
 	, util = require('util');
 
 exports.index = function(req, res){
+	var url=req.param('url')||req.get('Referrer')||'http://www.cnn.com';
+	res.render('speedreport', {
+		url: url
+		, barWidth: '4px'
+	});
+}
+exports.data = function(req, res){
 	var url=req.param('url')||req.get('Referrer')||'http://www.cnn.com'
 		, task = req.param('task')||'performance'
 		, contentType='json';
@@ -33,8 +40,8 @@ exports.index = function(req, res){
 		  fs.close(info.fd, function(err) {
 		    fs.readFile(info.path, function (err, data) {
 			  if (err) throw err;
-  			  res.render('speedreport', { reportdata: data });
-			  //util.puts(JSON.stringify(data));
+			  res.set('Content-Type', 'application/json');
+  			  res.send(data);
 			});
 		  });
 		})

@@ -30,6 +30,7 @@ app.configure('development', function(){
 
 app.get('/', routes.index);
 app.get('/speedreport', speedreport.index);
+app.get('/speedreport/data', speedreport.data);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
