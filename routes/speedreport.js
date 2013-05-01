@@ -76,6 +76,7 @@ exports.data = function(req, res){
 		    fs.readFile(info.path, function (err, data) {
 			  if (err) throw err;
 			  var dataObj=(typeof data === 'object')?data:JSON.parse(data);
+			  console.log(dataObj);
 			  res.set('Content-Type', 'application/json');
   			  res.send(data);
 				if(dataObj){
