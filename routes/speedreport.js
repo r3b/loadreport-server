@@ -77,9 +77,8 @@ exports.data = function(req, res){
 			  if (err) throw err;
 			  res.set('Content-Type', 'application/json');
   			  res.send(data);
-  			  console.log(data.toJSON());
 				if(data){
-					db.save(data.toJSON(), function (err, res) {
+					db.save(JSON.parse(data.toString()), function (err, res) {
 						if (err) {
 							console.error("there was an error saving the data", err);
 						} else {
