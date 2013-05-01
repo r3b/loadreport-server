@@ -13,7 +13,7 @@ var childProcess = require('child_process')
 	, cradle = require('cradle')
 	, Url = require("url")
 	;
-
+console.log('couchdb host is %s',process.env.CLOUDANT_URL||'localhost');
 cradle.setup({
     host: process.env.CLOUDANT_URL||'localhost',
     cache: true,
