@@ -12,14 +12,18 @@ var childProcess = require('child_process')
 	, util = require('util')
 	, cradle = require('cradle')
 	, Url = require("url")
+	, db_url=Url.parse(process.env.CLOUDANT_URL||'https://app15424114.heroku:ys8YAkD1RhvAoPRq5lyS73cQ@app15424114.heroku.cloudant.com')
+	, auth=db_url.auth.split(':')
+	, username=auth[0]||''
+	, password=auth[1]||''
 	;
-console.log('couchdb host is %s',process.env.CLOUDANT_URL||'localhost');
-cradle.setup({
-    host: process.env.CLOUDANT_URL||'localhost',
-    cache: true,
-    raw: false
-});
-var conn = new(cradle.Connection)
+console.log('couchdb host is %s',db_url.href);
+var conn = new(cradle.Connection)(db_url.hostname, 443, {
+			secure: true,
+			cache: true,
+    		raw: false,
+			auth: { username: username, password: password }
+		})
 	, db = conn.database('speedreport')
 ;
 db.exists(function (err, exists) {
