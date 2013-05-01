@@ -75,12 +75,11 @@ exports.data = function(req, res){
 		  fs.close(info.fd, function(err) {
 		    fs.readFile(info.path, function (err, data) {
 			  if (err) throw err;
-			  var dataObj=(typeof data === 'object')?data:JSON.parse(data);
-			  console.log(dataObj);
 			  res.set('Content-Type', 'application/json');
   			  res.send(data);
-				if(dataObj){
-					db.save(dataObj, function (err, res) {
+  			  //console.log(data.toString())
+				if(data){
+					db.save(data.toString(), function (err, res) {
 						if (err) {
 							console.error("there was an error saving the data", err);
 						} else {
