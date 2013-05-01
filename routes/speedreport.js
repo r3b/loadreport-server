@@ -81,7 +81,7 @@ exports.data = function(req, res){
 				if(dataObj){
 					db.save(dataObj, function (err, res) {
 						if (err) {
-							console.error("our data object is empty!");
+							console.error("there was an error saving the data", err);
 						} else {
 							console.log("data was saved successfully", res);
 						}
