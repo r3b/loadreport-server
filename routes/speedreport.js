@@ -68,15 +68,16 @@ exports.data = function(req, res){
 	  	childArgs.push(info.path);
 		console.log("running \"%s\"", childArgs);
 		childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
-		  console.error(err);
+		  /*console.error(err);
 		  console.warn(stderr);
-		  console.log(stdout);
+		  console.log(stdout);*/
 		  fs.write(info.fd, stdout);
 		  fs.close(info.fd, function(err) {
 		    fs.readFile(info.path, function (err, data) {
 			  if (err) throw err;
 			  res.set('Content-Type', 'application/json');
   			  res.send(data);
+  			  console.log(data.toJSON());
 				if(data){
 					db.save(data.toJSON(), function (err, res) {
 						if (err) {
