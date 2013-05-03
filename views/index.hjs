@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ title }}</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel="stylesheet" href='/stylesheets/black-tie/jquery-ui-1.10.2.custom.min.css' />
+    <link rel="stylesheet" href="/stylesheets/validationEngine.jquery.css" type="text/css"/>
+    <script src="/javascripts/libs/jquery-1.9.1.js"></script>
+    <script src="/javascripts/libs/jquery-ui-1.10.2.custom.min.js"></script>
+	<script src="/javascripts/libs/jquery.validationEngine-en.js"></script>
+	<script src="/javascripts/libs/jquery.validationEngine.js"></script>
+  </head>
+  <body>
+    <p>Welcome to {{ title }}</p>
+    <p>
+    	<form id="test">
+	    	<input type="url" placeholder="http://www.example.com" name="url" id="url" class="text-input" 
+	    		data-validation-engine="validate[required,custom[url]]"
+			    data-errormessage-custom-error="URL must be in the form: 'http://www.example.com'"/>
+	    	<input type="submit" id="go" value="GO"/>
+	    </form>
+    </p>
+    <script>
+		jQuery(document).ready(function(){
+			jQuery('#test').validationEngine({promptPosition:"bottomLeft"});
+			jQuery('#test').submit(function(){
+				if(jQuery('#test').validationEngine('validate')){
+					var url=jQuery('#url').val();
+					var href="/speedreport/?url="+url;
+					document.location=href;
+				}
+				return false;
+			});
+		});
+	    </script>
+  </body>
+</html>
