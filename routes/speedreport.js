@@ -47,17 +47,21 @@ db.exists(function (err, exists) {
 	}
 });
 exports.index = function(req, res){
-	var url=req.param('url')||req.get('Referrer')||'http://www.cnn.com';
-	res.render('speedreport', {
-		url: url
-		, barWidth: '4px'
-	});
+	var url=req.param('url');
+	if(url){
+		res.render('speedreport', {
+			url: url
+			, barWidth: '4px'
+		});
+	}else{
+		res.redirect('/');
+	}
 }
 exports.data = function(req, res){
-	var url=req.param('url')||req.get('Referrer')||'http://www.cnn.com'
+	var url=req.param('url')
 		, task = req.param('task')||'performance'
 		, contentType='json';
-
+	if(url){
 	var childArgs = [
 	  path.join(__dirname, '/../public/javascripts/speedreport.js'),
 	  url
@@ -92,4 +96,7 @@ exports.data = function(req, res){
 		  });
 		})
 	});
+	}else{
+		res.send(400, "invalid URL specified in search string");
+	}
 };
