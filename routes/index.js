@@ -4,5 +4,5 @@
  */
 
 exports.index = function(req, res){
-  res.render('index', { title: 'SpeedReport' });
+  res.render('index', { title: 'SpeedReport', path: '/speedreport/report/' });
 };

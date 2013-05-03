@@ -7,6 +7,7 @@ var express = require('express')
   , routes = require('./routes')
   , user = require('./routes/user')
   , speedreport = require('./routes/speedreport')
+  , loadreport = require('./routes/loadreport')
   , http = require('http')
   , path = require('path');
 
@@ -29,9 +30,14 @@ app.configure('development', function(){
 });
 
 app.get('/', routes.index);
-app.get('/speedreport', speedreport.index);
+//speedreport
+app.get('/speedreport/', speedreport.index);
+app.get('/speedreport/report', speedreport.report);
 app.get('/speedreport/data', speedreport.data);
-
+//loadreport
+app.get('/loadreport/', loadreport.index);
+app.get('/loadreport/:task/:format/report', loadreport.report);
+app.get('/loadreport/:task/:format/data', loadreport.data);
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
 });

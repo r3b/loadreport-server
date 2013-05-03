@@ -2,7 +2,6 @@
 /*
  * GET home page.
  */
-
 var childProcess = require('child_process')
 	, phantomjs = require('phantomjs')
 	, binPath = phantomjs.path
@@ -24,15 +23,15 @@ var conn = new(cradle.Connection)(db_url.hostname, 443, {
     		raw: false,
 			auth: { username: username, password: password }
 		})
-	, db = conn.database('speedreport')
+	, db = conn.database('loadreport')
 ;
 db.exists(function (err, exists) {
 	if (err) {
 		console.log('error connecting to database', err);
 	} else if (exists) {
-		console.log('speedreport database exists');
+		console.log('loadreport database exists');
 	} else {
-		console.warn('speedreport database does not exists.');
+		console.warn('loadreport database does not exists.');
 		console.log('creating database');
 		db.create();
 		/* populate design documents */
@@ -47,45 +46,38 @@ db.exists(function (err, exists) {
 	}
 });
 exports.index = function(req, res){
-  res.render('index', { title: 'SpeedReport', path: '/speedreport/report' });
+  res.render('index', { title: 'Load Report', path: '/loadreport/performance/json/data/' });
 };
 exports.report = function(req, res){
-	var url=req.param('url');
-	if(url){
-		res.render('speedreport', {
-			url: url
-			, barWidth: '4px'
-		});
-	}else{
-		res.redirect('/');
-	}
-}
+  res.render('index', { title: 'Load Report', path: '/loadreport/performance/json/data/' });
+};
 exports.data = function(req, res){
+	console.dir(req.params)
 	var url=req.param('url')
 		, task = req.param('task')||'performance'
+		, format = req.param('format')||'json'
 		, contentType='json';
 	if(url){
-	var childArgs = [
-	  path.join(__dirname, '/../public/javascripts/speedreport.js'),
-	  url
-	]
-	// Process the data (note: error handling omitted)
-	temp.open('speedreport-', function(err, info) {
-	  if(err) throw err;
-	  	childArgs.push(info.path);
+		var childArgs = [
+			path.join(__dirname, '/../public/javascripts/loadreport.js')
+			, url
+			, task
+			, format
+		];
+		//childArgs.push(info.path);
 		console.log("running \"%s\"", childArgs);
 		childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
-		  /*console.error(err);
-		  console.warn(stderr);
-		  console.log(stdout);*/
-		  fs.write(info.fd, stdout);
-		  fs.close(info.fd, function(err) {
-		    fs.readFile(info.path, function (err, data) {
-			  if (err) throw err;
-			  res.set('Content-Type', 'application/json');
-  			  res.send(data);
-				if(data){
-					db.save(JSON.parse(data.toString()), function (err, res) {
+			if(err){
+				res.send(500, err);
+			}else{
+				if(format==='csv'){
+				  	res.set('Content-Type', 'text/csv');
+				}else{
+				  	res.set('Content-Type', 'application/json');
+				}
+				res.send(stdout);
+				if(stdout){
+					db.save(JSON.parse(stdout.toString()), function (err, res) {
 						if (err) {
 							console.error("there was an error saving the data", err);
 						} else {
@@ -95,11 +87,10 @@ exports.data = function(req, res){
 				}else{
 					console.error("our data object is empty!");
 				}
-			});
-		  });
-		})
-	});
+			}
+		});
 	}else{
 		res.send(400, "invalid URL specified in search string");
 	}
+	//res.render('index', { title: req.params['task'] });
 };

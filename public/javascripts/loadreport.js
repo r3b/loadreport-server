@@ -45,18 +45,18 @@ var confess = {
                 var _timer1=setInterval(function(){
                     if(/interactive/.test(document.readyState)){
                         clearInterval(_timer1);
-                        console.log('interactive-' + (new Date().getTime() - startTime));
+                        //console.log('interactive-' + (new Date().getTime() - startTime));
                     }
                 }, 10);
 
                 var _timer2=setInterval(function(){
                     if(/loaded|complete/.test(document.readyState)){
                         clearInterval(_timer2);
-                        console.log('complete-' + (new Date().getTime() - startTime));
+                        //console.log('complete-' + (new Date().getTime() - startTime));
                     }
                 }, 10);
 
-                window.onload = function(){console.log('onload-' + (new Date().getTime() - startTime));};
+                //window.onload = function(){console.log('onload-' + (new Date().getTime() - startTime));};
 
                 window.onerror = function(message, url, linenumber) {
                     console.log("jserror-JavaScript error: " + message + " on line " + linenumber + " for " + url);
@@ -64,13 +64,13 @@ var confess = {
             },this.performance.start);
         },
         onLoadStarted: function (page, config) {
-            console.log("load started");
+            //console.log("load started");
             if (!this.performance.start) {
                 this.performance.start = new Date().getTime();
             }
         },
         onResourceRequested: function (page, config, request) {
-            console.log("resource requested: %s", request.url);
+            //console.log("resource requested: %s", request.url);
             var now = new Date().getTime();
             this.performance.resources[request.id] = {
                 id: request.id,
@@ -85,7 +85,6 @@ var confess = {
             if (!this.performance.start || now < this.performance.start) {
                 this.performance.start = now;
             }
-
         },
         onResourceReceived: function (page, config, response) {
             var now = new Date().getTime(),
@@ -148,7 +147,7 @@ var confess = {
             });
 
             if (config.verbose) {
-                console.log('');
+                //console.log('');
                 this.emitConfig(config, '');
             }
 
@@ -176,44 +175,16 @@ var confess = {
 
 
             //console.log(JSON.stringify(report));
-            console.log('Elapsed load time: ' + this.pad(elapsed, 6) + 'ms');
+            //console.log('Elapsed load time: ' + this.pad(elapsed, 6) + 'ms');
 
             if(phantom.args.indexOf('csv') >= 0){
-                this.printToFile(config,report,'confess-report','csv',phantom.args.indexOf('wipe') >= 0);
+                this.printToSTDOUT(config,report,'confess-report','csv',phantom.args.indexOf('wipe') >= 0);
             }
 
             if(phantom.args.indexOf('json') >= 0){
-                this.printToFile(config,report,'confess-report','json',phantom.args.indexOf('wipe') >= 0);
+                this.printToSTDOUT(config,report,'confess-report','json',phantom.args.indexOf('wipe') >= 0);
             }
-
-//            if (config.verbose) {
-//                console.log('');
-//                var ths = this,
-//                    length = 104,
-//                    ratio = length / elapsed,
-//                    bar;
-//                resources.forEach(function (resource) {
-//                    bar = ths.repeat(' ', (resource.times.request - start) * ratio) +
-//                        ths.repeat('-', (resource.times.start - resource.times.request) * ratio) +
-//                        ths.repeat('=', (resource.times.end - resource.times.start) * ratio)
-//                    ;
-//                    bar = bar.substr(0, length) + ths.repeat(' ', length - bar.length);
-//                    console.log(ths.pad(resource.id, 3) + '|' + bar + '|');
-//                });
-//                console.log('');
-//                resources.forEach(function (resource) {
-//                    console.log(
-//                        ths.pad(resource.id, 3) + ': ' +
-//                            ths.pad(resource.duration, 6) + 'ms; ' +
-//                            ths.pad(resource.size, 7) + 'b; ' +
-//                            ths.truncate(resource.url, 84)
-//                    );
-//                });
-//            }
-
         }
-
-
     },
 
     filmstrip: {
@@ -264,14 +235,6 @@ var confess = {
         var page = new WebPage(),
             pagetemp = new WebPage(),
             event;
-
-
-
-//        if (config.consolePrefix) {
-//            page.onConsoleMessage = function (msg, line, src) {
-//                console.log(config.consolePrefix + '---+++ ' + msg + ' (' + src + ', #' + line + ')');
-//            }
-//        }
         if (config.userAgent && config.userAgent != "default") {
             if (config.userAgentAliases[config.userAgent]) {
                 config.userAgent = config.userAgentAliases[config.userAgent];
@@ -437,25 +400,6 @@ var confess = {
         return ((new Date()).getTime() - start);
     },
 
-    /*worker: function(now,page){
-        var currentTime = now - this.performance.start;
-        var ths = this;
-
-
-        if((currentTime) >= this.performance.count1){
-            var worker = new Worker('file:///Users/wesleyhales/phantom-test/worker.js');
-            worker.addEventListener('message', function (event) {
-                //getting errors after 3rd thread with...
-                //_this.workerTask.callback(event);
-                //mycallback(event);
-                console.log('message' + event.data);
-            }, false);
-            worker.postMessage(page);
-            this.performance.count2++;
-            this.performance.count1 = currentTime + (this.performance.count2 * 100);
-        }
-    },*/
-
     screenshot: function(now,page){
         var start = this.timerStart();
         var currentTime = now - this.performance.start;
@@ -528,6 +472,27 @@ var confess = {
             } catch (e) {
                 console.log("problem writing to file",e);
             }
+        }
+    },
+    printToSTDOUT: function(config,report,filename,extension,createNew) {
+        var keys = [], values = [];
+        for(var key in report)
+        {
+            if(report.hasOwnProperty(key))
+            {
+                keys.push(key);
+                values.push(report[key]);
+            }
+        }
+        try {
+            if(extension === 'json'){
+                console.log(JSON.stringify(report));
+            }else{
+                console.log(keys);
+                console.log(values);
+            }
+        } catch (e) {
+            console.log("problem writing to file",e);
         }
     }
 

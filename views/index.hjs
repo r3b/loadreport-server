@@ -26,7 +26,7 @@
 			jQuery('#test').submit(function(){
 				if(jQuery('#test').validationEngine('validate')){
 					var url=jQuery('#url').val();
-					var href="/speedreport/?url="+url;
+					var href="{{path}}?url="+url;
 					document.location=href;
 				}
 				return false;
