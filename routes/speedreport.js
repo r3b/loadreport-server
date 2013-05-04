@@ -5,6 +5,7 @@
 
 var childProcess = require('child_process')
 	, phantomjs = require('phantomjs')
+	, phantom = require('phantom')
 	, binPath = phantomjs.path
 	, path = require('path')
 	, fs= require('fs')
@@ -75,9 +76,6 @@ exports.data = function(req, res){
 	  	childArgs.push(info.path);
 		console.log("running \"%s\"", childArgs);
 		childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
-		  /*console.error(err);
-		  console.warn(stderr);
-		  console.log(stdout);*/
 		  fs.write(info.fd, stdout);
 		  fs.close(info.fd, function(err) {
 		    fs.readFile(info.path, function (err, data) {
@@ -103,3 +101,52 @@ exports.data = function(req, res){
 		res.send(400, "invalid URL specified in search string");
 	}
 };
+exports.stream=function(req, res){
+	var url=req.param('url')
+	    , t
+	    , onLoadFinishedFired = false
+	    , requests={}
+	    , responses={}
+	    , pageInfo={url:url, assets:[]};
+	if(url){
+		phantom.create(function(ph, err) {
+		  return ph.createPage(function(page) {
+			page.set('onResourceRequested', function (r) {
+				console.log("onResourceRequested");
+			    if(r)requests[r.id]=r;
+			});
+			page.set('onResourceReceived', function (r) {
+				console.log("onResourceReceived");
+			    if(r && !(r.id in responses)){
+			        responses[r.id]=r;
+			    } else {
+			        for(var i in responses[r.id]){
+			            if(responses[r.id].hasOwnProperty(i) && !(i in r)){
+			                r[i]=responses[r.id][i];
+			            }
+			        }
+			        r.received=responses[r.id].time;
+			        pageInfo.assets.push({
+			            request:requests[r.id],
+			            response:r
+			        });
+			    }
+			});
+			page.set('onLoadFinished', function (status) {
+			    pageInfo.requestTime=t;
+			    pageInfo.responseTime=Date.now();
+			    if (status !== 'success') {
+			        res.send(400, 'Failed to load the address');
+			    }else{
+			    	res.send(JSON.stringify(pageInfo));
+			    }
+				ph.exit();
+			});
+			t = Date.now();
+			return page.open(url);
+		  });
+		});
+	}else{
+		res.redirect('/');
+	}	
+}

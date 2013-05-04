@@ -7,7 +7,7 @@ var fs = require('fs')
     , pageInfo={url:address, assets:[]};
 
 if (phantom.args.length === 0) {
-    console.log('Usage: loadspeed.js performence <URL>');
+    console.log('Usage: speedreport.js performance <URL>');
     phantom.exit();
 }
 page.onResourceRequested = function (r) {

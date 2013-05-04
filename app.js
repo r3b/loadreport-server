@@ -33,7 +33,8 @@ app.get('/', routes.index);
 //speedreport
 app.get('/speedreport/', speedreport.index);
 app.get('/speedreport/report', speedreport.report);
-app.get('/speedreport/data', speedreport.data);
+app.get('/speedreport/data', speedreport.stream);
+//app.get('/speedreport/data2', speedreport.stream);
 //loadreport
 app.get('/loadreport/', loadreport.index);
 app.get('/loadreport/:task/:format/report', loadreport.report);
