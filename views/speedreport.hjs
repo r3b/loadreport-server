@@ -8,7 +8,8 @@
     <script src="/javascripts/libs/jquery-1.9.1.js"></script>
     <script src="/javascripts/libs/jquery-ui-1.10.2.custom.min.js"></script>
     <script src="/javascripts/libs/jquery.sparkline.min.js"></script>
-    <script src="/javascripts/sparkline_binding.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="/javascripts/d3_binding.js"></script>
     <script src="/javascripts/polyfills.js"></script>
     <script src="/javascripts/RequestModel.js"></script>
 </head>
@@ -62,6 +63,15 @@
         height:100%;
         font-size:32px;
     }
+    .chart div {
+      font: 10px sans-serif;
+      background-color: steelblue;
+      text-align: right;
+      padding: 3px;
+      margin: 1px;
+      color: white;
+    }
+
 </style>
 <h1>Speed report for <span data-bind="text:url"></span></h1>
 <div id="interstitial">
