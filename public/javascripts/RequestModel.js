@@ -57,7 +57,13 @@
         that.downloadTime = ko.computed(function () {
             return this.endTime() - this.receivedTime()
         }, that);
-        that.blocking = ko.observable();
+        that.blocking = ko.observable(0);
+        that.lifetime = ko.computed(function () {
+            return this.blocking() + this.duration()
+        }, that);
+        /*that.blocking = ko.computed(function () {
+            return this.startTime() - this.request().milliseconds()
+        }, that);*/
         that.latency = ko.computed(function () {
             return this.receivedTime() - this.startTime()
         }, that);
@@ -82,7 +88,10 @@
         });
 
         for (var a = 0, al = assets.length; a < al; a++) {
-            var raa = r.assets[a], asset = new AssetModel(raa.request, raa.response);
+            var raa = r.assets[a], 
+                asset = new AssetModel(raa.request, raa.response),
+                time=Date.parse(raa.request.time);
+            console.log(that.startTime(), asset.startTime(), time)
             asset.blocking(asset.startTime() - that.startTime());
             that.assets.push(asset);
         }
@@ -141,7 +150,7 @@
         });
         that.stacked = ko.computed(function () {
             return that.assets().reduce(function (result, current, index, array) {
-                result.push([current.blocking(), current.latency(), current.downloadTime(), current.duration()]);
+                result.push([current.blocking(), current.latency(), current.downloadTime(), current.duration(), current.lifetime()]);
                 return result;
             }, [])
         });

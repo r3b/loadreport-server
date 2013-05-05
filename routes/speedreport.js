@@ -53,7 +53,7 @@ exports.index = function(req, res){
 exports.report = function(req, res){
 	var url=req.param('url');
 	if(url){
-		res.render('speedreport', {
+		res.render('speedreport_d3', {
 			url: url
 			, barWidth: '4px'
 		});

@@ -9,6 +9,7 @@
     <script src="/javascripts/libs/jquery-ui-1.10.2.custom.min.js"></script>
     <script src="/javascripts/libs/jquery.sparkline.min.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="/javascripts/sparkline_binding.js"></script>
     <script src="/javascripts/d3_binding.js"></script>
     <script src="/javascripts/polyfills.js"></script>
     <script src="/javascripts/RequestModel.js"></script>
@@ -71,7 +72,9 @@
       margin: 1px;
       color: white;
     }
-
+.chart rect {
+  stroke: white;
+}
 </style>
 <h1>Speed report for <span data-bind="text:url"></span></h1>
 <div id="interstitial">
@@ -92,32 +95,33 @@
         <div class="bigGraph" id="tabs-1">
             <h2>Stacked</h2>
             <h4>Size, in bytes, of the download</h4>
-            <span data-bind="sparkline: stacked, sparklineOptions:{type: 'bar', width:'100%', height: 100, barWidth:'{{barWidth}}',barSpacing:'1px',tooltipFormatter: tooltipFormatterStacked},d3:{data:assets,property:'blocking'}">Loading...</span>
+            <span data-bind="sparkline: stacked, sparklineOptions:{type: 'bar', width:'100%', height: 100, barWidth:'{{barWidth}}',barSpacing:'1px',tooltipFormatter: tooltipFormatterStacked}">Loading...</span>
+            <span data-bind="d3:{data:stacked,duration:duration,properties:[4,0,2,1]}">Loading...</span>
         </div>
         <div class="bigGraph" id="tabs-2">
             <h2>Blocking</h2>
             <h4>Time spend blocking before the request is made</h4>
-            <span data-bind="sparkline: blockings, sparklineOptions:{type: 'bar', barColor:'#3366cc', width:'100%', height: 100, barWidth:'{{barWidth}}',barSpacing:'1px', tooltipFormatter: tooltipFormatter,d3:{data:assets,property:'blocking'}}">Loading...</span>
+            <span data-bind="{d3:{data:stacked,duration:duration,properties:[0]}}">Loading...</span>
         </div>
         <div class="bigGraph" id="tabs-3">
             <h2>Latency</h2>
             <h4>Time elapsed from when the request is made until the initial response is received</h4>
-            <span data-bind="sparkline: latencies, sparklineOptions:{type: 'bar', barColor:'#dc3912', width:'100%', height: 100, barWidth:'{{barWidth}}',barSpacing:'1px', tooltipFormatter: tooltipFormatter,d3:{data:assets,property:'latency'}}">Loading...</span>
+            <span data-bind="d3:{data:stacked,duration:duration,properties:[1]}">Loading...</span>
         </div>
         <div class="bigGraph" id="tabs-4">
             <h2>Download Time</h2>
             <h4>Time elapsed from the first byte received to the last byte received </h4>
-            <span data-bind="sparkline: downloadTimes, sparklineOptions:{type: 'bar', barColor:'#ff9900', width:'100%', height: 100, barWidth:'{{barWidth}}',barSpacing:'1px', tooltipFormatter: tooltipFormatter,d3:{data:assets,property:'downloadTime'}}">Loading...</span>
+            <span data-bind="d3:{data:stacked,duration:duration,properties:[2]}">Loading...</span>
         </div>
         <div class="bigGraph" id="tabs-5">
             <h2>Asset duration</h2>
             <h4>Total elapsed time from request to completion</h4>
-            <span data-bind="sparkline: durations, sparklineOptions:{type: 'bar', barColor:'#109618', width:'100%', height: 100, barWidth:'{{barWidth}}',barSpacing:'1px', tooltipFormatter: tooltipFormatter,d3:{data:assets,property:'duration'}}">Loading...</span>
+            <span data-bind="d3:{data:stacked,duration:duration,properties:[3]}">Loading...</span>
         </div>
         <div class="bigGraph"  id="tabs-6">
             <h2>Asset size</h2>
             <h4>Size, in bytes, of the download</h4>
-            <span data-bind="sparkline: sizes, sparklineOptions:{type: 'bar', width:'100%', height: 100, barWidth:'{{barWidth}}',barSpacing:'1px', tooltipFormatter: tooltipFormatterBytes,d3:{data:assets,property:'size'}}">Loading...</span>
+            <span data-bind="d3:{data:sizes,properties:[0]}">Loading...</span>
         </div>
         <div class="bigGraph"  id="tabs-8">
             <h2>Content Type</h2>
