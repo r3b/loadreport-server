@@ -177,7 +177,6 @@
 				.on('mouseover',function(d,i){
 					var tooltip=d3.select("div.tooltip")
 					var item=data.assets[i];
-					console.log(d,i,item);
 					tooltip.transition()        
 		                .duration(200)      
 		                .style("opacity", .9);      
@@ -185,14 +184,14 @@
 		            		'blocking:&nbsp;'+item.blocked+'ms<br/>'+
 		            		'latency:&nbsp;'+item.latency+'ms<br/>'+
 		            		'download time:&nbsp;'+item.downloadTime+'ms<br/>'+
-		            		'total:&nbsp;'+item.pageLifetime+'ms<br/>'
+		            		'total:&nbsp;'+item.pageLifetime+'ms<br/>'+
+		            		'size:&nbsp;'+item.response.bodySize+' bytes<br/>'
 
 		            	)
 		                .style("left", (d3.event.pageX) + "px")     
 		                .style("top", (d3.event.pageY - 28) + "px");    
 		            //})                
 				})
-				.on('mouseover',function(d,i){})
 				.on('mouseout',function(d,i){
 					d3.select("div.tooltip").transition()        
 		                .duration(500)      
