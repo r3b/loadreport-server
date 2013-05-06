@@ -20,13 +20,27 @@ var childProcess = require('child_process')
   //Connect to RabbitMQ and get reference to the connection.
   var connection = amqp.createConnection({url:url});
   var replyQueue;
+  var broker={};
 console.log('AMQP url: %s',url);
 connection.on('ready', function () {
       //chatExchange = connection.exchange('chatExchange', {'type': 'fanout'});
       //chatExchange.publish('', 'blah');
       connection.queue('reports-reply', function (q) {
       	replyQueue=q;
-       q.bind("#");
+        q.bind("#");
+	       //console.log('subscribing to replyQueue', replyQueue);
+	       replyQueue.subscribe(function (message, headers, deliveryInfo) {
+	         if(!broker[message.key])return;
+	         var res=broker[message.key].res;
+	         var req=broker[message.key].req;
+	         console.log('app',message.data);
+	         phelper.getSavedReport(message.data.id, function (err, doc) {
+				res.set('Content-Type', 'application/json');
+	  			res.send(doc);
+			});
+	         delete broker[message.key];
+       });
+
       });
 
 
@@ -52,15 +66,8 @@ exports.data = function(req, res){
 		, contentType='json';
 	if(url){
       var key=uuid.v1();
-      console.log('subscribing to replyQueue', replyQueue);
-       replyQueue.subscribe(function (message, headers, deliveryInfo) {
-         if(key!==message.key)return;
-         console.log('app',message.data);
-         phelper.getSavedReport(message.data.id, function (err, doc) {
-			res.set('Content-Type', 'application/json');
-  			res.send(doc);
-		});
-       });
+      //hold this spot
+      broker[key]={req:req,res:res};
       connection.publish('reports-request', {key:key,url:url});
 	}else{
 		res.send(400, "invalid URL specified in search string");
