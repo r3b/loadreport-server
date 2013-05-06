@@ -12,7 +12,25 @@ var childProcess = require('child_process')
 	, temp = require('temp')
 	, util = require('util')
 	, phelper=require('../helpers/phantomHelper.js')
+	, uuid = require('node-uuid')
 	;
+  var url = process.env.CLOUDAMQP_URL || "amqp://localhost"; // default to localhost
+  var amqp = require('amqp');
+  var uuid = require('node-uuid');
+  //Connect to RabbitMQ and get reference to the connection.
+  var connection = amqp.createConnection({url:url});
+  var replyQueue;
+connection.on('ready', function () {
+      //chatExchange = connection.exchange('chatExchange', {'type': 'fanout'});
+      //chatExchange.publish('', 'blah');
+      connection.queue('reports-reply', function (q) {
+      	replyQueue=q;
+       q.bind("#");
+      });
+
+
+  });
+
 exports.index = function(req, res){
   res.render('index', { title: 'SpeedReport', path: '/speedreport/report' });
 };
@@ -32,18 +50,16 @@ exports.data = function(req, res){
 		, task = req.param('task')||'performance'
 		, contentType='json';
 	if(url){
-		phelper.speedReport(url,task,contentType,function(err, data){
-			if(err){
-				res.send(500, err);
-			}else{
-				//check the database
-				phelper.getSavedReport(data._id, function (err, doc) {
-					res.set('Content-Type', 'application/json');
-		  			res.send(doc);
-				});
-
-			}
-		})
+      var key=uuid.v1();
+       replyQueue.subscribe(function (message, headers, deliveryInfo) {
+         if(key!==message.key)return;
+         console.log('app',message.data);
+         phelper.getSavedReport(message.data.id, function (err, doc) {
+			res.set('Content-Type', 'application/json');
+  			res.send(doc);
+		});
+       });
+      connection.publish('reports-request', {key:key,url:url});
 	}else{
 		res.send(400, "invalid URL specified in search string");
 	}
