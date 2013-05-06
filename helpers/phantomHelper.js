@@ -57,9 +57,14 @@ exports.speedReport=function(url,task,contentType, callback){
 			  fs.close(info.fd, function(err) {
 			    fs.readFile(info.path, function (err, data) {
 				  if (err) return callback(err, null);
-
 					if(data){
-						db.save(JSON.parse(data.toString()), function (err, res) {
+						var obj;
+						try{
+							obj=JSON.parse(data.toString())
+						}catch(e){
+							return callback(e, null);
+						}
+						db.save(obj, function (err, res) {
 							if (err) {
 								console.error("there was an error saving the data", err);
 								return callback(err, null);
