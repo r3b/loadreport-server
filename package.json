@@ -16,6 +16,7 @@
     "phantom": "~0.4.2",
     "socket.io": "~0.9.14",
     "amqp": "~0.1.6",
-    "node-uuid": "~1.4.0"
+    "node-uuid": "~1.4.0",
+    "nodefly": "~0.1.40"
   }
 }
