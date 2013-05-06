@@ -50,8 +50,15 @@ exports.index = function(req, res){
   res.render('index', { title: 'SpeedReport', path: '/speedreport/report' });
 };
 exports.report = function(req, res){
-	var url=req.param('url');
-	if(url){
+	var url=req.param('url')
+		, id=req.param('id');
+    if(id){
+		res.render('speedreport_d3', {
+			id: id
+			, url: url
+			, barWidth: '4px'
+		});
+	}else if(url){
 		res.render('speedreport_d3', {
 			url: url
 			, barWidth: '4px'
@@ -62,9 +69,15 @@ exports.report = function(req, res){
 }
 exports.data = function(req, res){
 	var url=req.param('url')
+		, id=req.param('id')
 		, task = req.param('task')||'performance'
 		, contentType='json';
-	if(url){
+	if(id){
+		phelper.getSavedReport(id, function (err, doc) {
+			res.set('Content-Type', 'application/json');
+  			res.send(doc);
+		});
+	}else if(url){
       var key=uuid.v1();
       //hold this spot
       broker[key]={req:req,res:res};
