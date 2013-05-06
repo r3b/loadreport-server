@@ -20,6 +20,7 @@ var childProcess = require('child_process')
   //Connect to RabbitMQ and get reference to the connection.
   var connection = amqp.createConnection({url:url});
   var replyQueue;
+console.log('AMQP url: %s',url);
 connection.on('ready', function () {
       //chatExchange = connection.exchange('chatExchange', {'type': 'fanout'});
       //chatExchange.publish('', 'blah');
@@ -51,6 +52,7 @@ exports.data = function(req, res){
 		, contentType='json';
 	if(url){
       var key=uuid.v1();
+      console.log('subscribing to replyQueue', replyQueue);
        replyQueue.subscribe(function (message, headers, deliveryInfo) {
          if(key!==message.key)return;
          console.log('app',message.data);
