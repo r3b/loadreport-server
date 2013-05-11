@@ -31,14 +31,32 @@ connection.on('ready', function () {
 	       //console.log('subscribing to replyQueue', replyQueue);
 	       replyQueue.subscribe(function (message, headers, deliveryInfo) {
 	         if(!broker[message.key])return;
-	         var res=broker[message.key].res;
-	         var req=broker[message.key].req;
-	         console.log('app',message.data);
-	         phelper.getSavedReport(message.data.id, function (err, doc) {
-				res.set('Content-Type', 'application/json');
-	  			res.send(doc);
-			});
-	         delete broker[message.key];
+	         process.nextTick(function(){
+		         var res=broker[message.key].res;
+		         var req=broker[message.key].req;
+		         if(message.error){
+		         	process.nextTick(function(){
+			         	console.error("reports-reply message contains an error",message.error);
+			         	res.send(500, message.error);
+		         	});
+		         }else if(!message.data){
+		         	process.nextTick(function(){
+			         	console.error("reports-reply message contains no data",message, headers, deliveryInfo);
+			         	res.send(500, "report contains no data");
+		         	});
+		         }else{
+		         	process.nextTick(function(){
+				         console.log('app',message.data);
+				         phelper.getSavedReport(message.data.id, function (err, doc) {
+							res.set('Content-Type', 'application/json');
+				  			res.send(doc);
+						});
+			         });
+			     }
+			 });
+	         process.nextTick(function(){
+		         delete broker[message.key];
+		     });
        });
 
       });
