@@ -7,7 +7,7 @@ var fs = require('fs')
     , pageInfo={url:address, assets:[]};
 
 if (phantom.args.length === 0) {
-    console.log('Usage: speedreport.js performance <URL>');
+    console.log('Usage: speedreport.js <URL>');
     phantom.exit();
 }
 page.onResourceRequested = function (r) {
@@ -29,6 +29,10 @@ page.onResourceReceived = function (r) {
         });
     }
 };
+page.onError=function(){
+    console.error("error");
+    console.dir(arguments);
+}
 t = Date.now();
 page.open(address, function (status) {
     pageInfo.requestTime=t;
@@ -37,7 +41,12 @@ page.open(address, function (status) {
         console.error('/* FAIL to load the address */');
     } else {
         t = Date.now() - t;
-        printToFile(JSON.stringify(pageInfo));
+        try {
+            var data=JSON.stringify(pageInfo)
+            printToFile(data);
+        }catch(e){
+            console.error("error writing to file ",e);
+        }
     }
     phantom.exit();
 });
@@ -71,7 +80,7 @@ function printToFile(data) {
         g.close();
 
     } catch (e) {
-        console.log("problem writing to file",e);
+        console.error("problem writing to file",e);
     }
 
 }
