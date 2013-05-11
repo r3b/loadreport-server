@@ -34,7 +34,7 @@ page.open(address, function (status) {
     pageInfo.requestTime=t;
     pageInfo.responseTime=Date.now();
     if (status !== 'success') {
-        console.log('/* FAIL to load the address */');
+        console.error('/* FAIL to load the address */');
     } else {
         t = Date.now() - t;
         printToFile(JSON.stringify(pageInfo));
