@@ -53,6 +53,7 @@ exports.speedReport=function(url,task,contentType, callback){
 		  	childArgs.push(info.path);
 			console.log("running \"%s\"", childArgs);
 			childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
+				if(err) return callback(err, null);
 			  fs.write(info.fd, stdout);
 			  fs.close(info.fd, function(err) {
 			    fs.readFile(info.path, function (err, data) {

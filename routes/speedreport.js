@@ -92,8 +92,12 @@ exports.data = function(req, res){
 		, contentType='json';
 	if(id){
 		phelper.getSavedReport(id, function (err, doc) {
-			res.set('Content-Type', 'application/json');
-  			res.send(doc);
+			if(err){
+				res.send(500, err);
+			}else{
+				res.set('Content-Type', 'application/json');
+	  			res.send(doc);
+			}
 		});
 	}else if(url){
       var key=uuid.v1();
