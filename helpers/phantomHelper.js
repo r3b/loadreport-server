@@ -54,33 +54,32 @@ exports.speedReport=function(url,task,contentType, callback){
 			console.log("running \"%s\"", childArgs);
 			childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
 				if(err) return callback(err, null);
-			  fs.write(info.fd, stdout);
-			  fs.close(info.fd, function(err) {
-			    fs.readFile(info.path, function (err, data) {
-				  if (err) return callback(err, null);
-					if(data){
-						var obj;
-						try{
-							obj=JSON.parse(data.toString())
-						}catch(e){
-							console.error("unable to parse JSON data", e);
-							return callback(e, null);
-						}
-						db.save(obj, function (err, res) {
-							if (err) {
-								console.error("there was an error saving the data", err);
-								return callback(err, null);
-							} else {
-								console.log("data was saved successfully", res);
-								return callback(null, res);
+				process.nextTick(function(){
+					fs.readFile(info.path, function (err, data) {
+					  if (err) return callback(err, null);
+						if(data){
+							var obj;
+							try{
+								obj=JSON.parse(data.toString())
+							}catch(e){
+								console.error("unable to parse JSON data", e);
+								return callback(e, null);
 							}
-						});
-					}else{
-						console.error("our data object is empty!");
-						return callback(new Error("the created object was empty"), null);
-					}
-				});
-			  });
+							db.save(obj, function (err, res) {
+								if (err) {
+									console.error("there was an error saving the data", err);
+									return callback(err, null);
+								} else {
+									console.log("data was saved successfully", res);
+									return callback(null, res);
+								}
+							});
+						}else{
+							console.error("our data object is empty!");
+							return callback(new Error("the created object was empty"), null);
+						}
+					});
+				})
 			})
 		});
 }
