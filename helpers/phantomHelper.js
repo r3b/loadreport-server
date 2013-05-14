@@ -25,22 +25,28 @@ var conn = new(cradle.Connection)(db_url.hostname, 443, {
 db.exists(function (err, exists) {
 	if (err) {
 		console.log('error connecting to database', err);
-	} else if (exists) {
+		return;
+	}
+	if (exists) {
 		console.log('speedreport database exists');
 	} else {
 		console.warn('speedreport database does not exists.');
 		console.log('creating database');
 		db.create();
-		/* populate design documents */
-		console.log('creating design docs');
-		db.save('_design/tests', {
-			all: {
-				map: function (doc) {
-				  if (doc.url) emit(doc.url, doc);
-				}
-			}
-		});
 	}
+	console.log('creating design docs');
+	db.save('_design/tests', {
+		all: {
+			map: function (doc) {
+			  if (doc.url) emit(doc.url, doc);
+			}
+		},
+		byURL:{
+			map: function (doc) {
+			  if (doc.url) emit(doc.url, new Date(doc.requestTime));
+			}
+		}
+	});
 });
 
 exports.speedReport=function(url,task,contentType, callback){
@@ -92,4 +98,16 @@ exports.getSavedReport=function(id, callback){
 			callback(null, doc);
 		}
 	});
+}
+exports.getSavedReportList=function(url, callback){
+	var options={};
+	if(url)options.key=url;
+	db.view('tests/byURL', options, function (err, doc) {
+      //console.dir(doc);
+		if(err){
+			callback(err, null);
+		}else{
+			callback(null, doc);
+		}
+  });
 }

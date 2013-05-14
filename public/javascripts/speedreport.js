@@ -76,7 +76,8 @@ function printToFile(data) {
     try {
 
         g = fs.open(myjson, "w");
-        g.writeLine(data);
+        g.write(data);
+        g.flush();
         g.close();
 
     } catch (e) {

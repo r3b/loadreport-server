@@ -38,6 +38,7 @@ app.get('/', routes.index);
 app.get('/speedreport/', speedreport.index);
 app.get('/speedreport/report', speedreport.report);
 app.get('/speedreport/data', speedreport.data);
+app.get('/speedreport/list', speedreport.list);
 //app.get('/speedreport/data2', speedreport.stream);
 //loadreport
 app.get('/loadreport/', loadreport.index);

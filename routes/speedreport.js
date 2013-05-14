@@ -85,6 +85,16 @@ exports.report = function(req, res){
 		res.redirect('/');
 	}
 }
+exports.list = function(req, res){
+	var url=req.param('url');
+    phelper.getSavedReportList(url, function(err, doc){
+    	if(err){
+    		res.send(500, err)
+    	}else{
+    		res.render('list',{items:doc});
+    	}
+    })
+}
 exports.data = function(req, res){
 	var url=req.param('url')
 		, id=req.param('id')
