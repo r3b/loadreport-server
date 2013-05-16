@@ -33,21 +33,70 @@ db.exists(function (err, exists) {
 		console.warn('speedreport database does not exists.');
 		console.log('creating database');
 		db.create();
+		console.log('creating design docs');
+		db.save('_design/tests', {
+			all: {
+				map: function (doc) {
+				  if (doc.url) emit(doc.url, doc);
+				}
+			},
+			byURL:{
+				map: function (doc) {
+				  if (doc.url) emit(doc.url, doc.requestTime);
+				}
+			},
+			unnormalized:{
+				map: function (doc) {
+				  if (!doc.normalized || doc.normalized<1) emit(doc.url, doc.requestTime);
+				}
+			}
+		});
 	}
-	console.log('creating design docs');
-	db.save('_design/tests', {
-		all: {
-			map: function (doc) {
-			  if (doc.url) emit(doc.url, doc);
-			}
-		},
-		byURL:{
-			map: function (doc) {
-			  if (doc.url) emit(doc.url, new Date(doc.requestTime));
-			}
-		}
-	});
 });
+function normalizeReportData(data){
+	data.duration=data.responseTime-data.requestTime;
+	data.blocked=0;
+	data.latency=0;
+	data.downloadTime=0;
+	data.lifetime=0;
+	data.pageLifetime=0;
+	data.assetCount=data.assets.length;
+	data.mimeTypes={};
+	data.mimeGroups={};
+	data.stacked=[];
+	data.stackedProperties=['Blocking', 'Latency', 'Download time', 'Lifetime'];
+	data.stackedColors=['steelblue', 'yellow', 'red', 'green'];
+	data.assets.forEach(function(asset){
+		asset.request.time=Date.parse(asset.request.time);
+		asset.response.time=Date.parse(asset.response.time);
+		asset.response.received=Date.parse(asset.response.received);
+		asset.blocked=asset.request.time-data.requestTime;
+		asset.latency=asset.response.received-asset.request.time;
+		asset.latencyStacked=asset.blocked+asset.latency;
+		asset.downloadTime=asset.response.time-asset.response.received;
+		asset.downloadTimeStacked=asset.latencyStacked+asset.downloadTime;
+		asset.lifetime=asset.response.time-asset.request.time;
+		asset.pageLifetime=asset.response.time-data.requestTime;
+		asset.stacked=[asset.blocked,asset.latencyStacked,asset.downloadTimeStacked, asset.pageLifetime];
+		asset.mimeType=asset.response.contentType;
+		if(asset.mimeType.indexOf(';')!==-1){
+			asset.mimeType=asset.response.contentType.substring(0,asset.response.contentType.indexOf(';'));
+		}
+		asset.mimeGroup=asset.mimeType.substring(0,asset.mimeType.indexOf('/'));
+		data.blocked+=asset.blocked;
+		data.latency+=asset.latency;
+		data.downloadTime+=asset.downloadTime;
+		data.lifetime+=asset.lifetime;
+		data.pageLifetime+=asset.pageLifetime;
+		data.stacked.push(asset.stacked);
+		if(asset.mimeType in data.mimeTypes){
+			data.mimeTypes[asset.mimeType].push(asset);
+		}else{
+			data.mimeTypes[asset.mimeType]=[asset];
+		}
+	})
+	return data;
+}
 
 exports.speedReport=function(url,task,contentType, callback){
 	task=task||'performance';
@@ -66,7 +115,7 @@ exports.speedReport=function(url,task,contentType, callback){
 						if(data){
 							var obj;
 							try{
-								obj=JSON.parse(data.toString())
+								obj=normalizeReportData(JSON.parse(data.toString()));
 							}catch(e){
 								console.error("unable to parse JSON data", e);
 								return callback(e, null);
@@ -95,14 +144,34 @@ exports.getSavedReport=function(id, callback){
 		if(err){
 			callback(err, null);
 		}else{
-			callback(null, doc);
+			callback(null, normalizeReportData(doc));
 		}
+	});
+}
+exports.updateSavedReport=function(id,callback){
+	db.get(id, function (err, doc) {
+		if(err)return callback(err);
+		doc=normalizeReportData(doc);
+		doc.normalized=1;
+		db.save(id,doc, callback);
 	});
 }
 exports.getSavedReportList=function(url, callback){
 	var options={};
 	if(url)options.key=url;
 	db.view('tests/byURL', options, function (err, doc) {
+      //console.dir(doc);
+		if(err){
+			callback(err, null);
+		}else{
+			callback(null, doc);
+		}
+  });
+}
+exports.getUnnormalizedReportList=function(url, callback){
+	var options={};
+	if(url)options.key=url;
+	db.view('tests/unnormalized', options, function (err, doc) {
       //console.dir(doc);
 		if(err){
 			callback(err, null);

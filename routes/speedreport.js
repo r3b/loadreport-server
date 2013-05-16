@@ -91,9 +91,26 @@ exports.list = function(req, res){
     	if(err){
     		res.send(500, err)
     	}else{
-    		res.render('list',{items:doc});
+    		doc=doc.sort(function(a,b){return (a.url===b.url)?a.value-b.value:0;})
+    		doc.forEach(function(d){d.requestTime=new Date(d.requestTime)});
+    		if(/\/data\//.test(req.path)){
+    			res.send(doc);
+    		}else{
+				res.render('list',{items:doc});
+    		}
     	}
     })
+}
+exports.compare = function(req, res){
+	var fromID=req.param('from');
+	var toID=req.param('to');
+    phelper.getSavedReport(fromID, function (err, from) {
+    	if(err) res.send(500, err);
+		phelper.getSavedReport(fromID, function (err, to) {
+    		if(err) res.send(500, err);
+			res.send({from:from,to:to});
+		});
+	});
 }
 exports.data = function(req, res){
 	var url=req.param('url')

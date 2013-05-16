@@ -368,8 +368,8 @@
 			}
 
     	}
-		d3.json('/speedreport/data?url={{url}}&id={{id}}',function(reportdata){
-			var data=normalizeReportData(reportdata);
+		d3.json('/speedreport/data?url={{url}}&id={{id}}',function(data){
+			//var data=normalizeReportData(reportdata);
 			var tooltip = d3.select("body").append("div")   
 				.attr("class", "tooltip")               
 				.style("opacity", 0);

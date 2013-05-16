@@ -8,7 +8,7 @@
 <body>
 	<ul>
 		{{#items}}
-			<li><a href="/speedreport/report?id={{id}}">{{value}}</a></li>
+			<li><a href="/speedreport/report?id={{id}}">{{key}}</a> {{value}}</li>
 		{{/items}}
 	</ul>
 </body>
