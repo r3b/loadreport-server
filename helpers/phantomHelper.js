@@ -33,25 +33,25 @@ db.exists(function (err, exists) {
 		console.warn('speedreport database does not exists.');
 		console.log('creating database');
 		db.create();
-		console.log('creating design docs');
-		db.save('_design/tests', {
-			all: {
-				map: function (doc) {
-				  if (doc.url) emit(doc.url, doc);
-				}
-			},
-			byURL:{
-				map: function (doc) {
-				  if (doc.url) emit(doc.url, doc.requestTime);
-				}
-			},
-			unnormalized:{
-				map: function (doc) {
-				  if (!doc.normalized || doc.normalized<1) emit(doc.url, doc.requestTime);
-				}
-			}
-		});
 	}
+	console.log('creating design docs');
+	db.save('_design/tests', {
+		all: {
+			map: function (doc) {
+			  if (doc.url) emit(doc.url, doc);
+			}
+		},
+		byURL:{
+			map: function (doc) {
+			  if (doc.url) emit(doc.url, doc.requestTime);
+			}
+		},
+		unnormalized:{
+			map: function (doc) {
+			  if (!doc.normalized || doc.normalized<1) emit(doc.id, doc.id);
+			}
+		}
+	});
 });
 function normalizeReportData(data){
 	data.duration=data.responseTime-data.requestTime;
@@ -95,6 +95,7 @@ function normalizeReportData(data){
 			data.mimeTypes[asset.mimeType]=[asset];
 		}
 	})
+	data.normalized=1;
 	return data;
 }
 
@@ -144,16 +145,22 @@ exports.getSavedReport=function(id, callback){
 		if(err){
 			callback(err, null);
 		}else{
+			/*var normDoc=doc;
+			if(!normDoc.normalized || normDoc.normalized<1){
+				normDoc=normalizeReportData(doc);
+				exports.saveReport(id, normDoc);
+			}*/
 			callback(null, normalizeReportData(doc));
 		}
 	});
 }
+exports.saveReport=function(id,doc, callback){
+	db.save(id,doc, callback);
+}
 exports.updateSavedReport=function(id,callback){
 	db.get(id, function (err, doc) {
 		if(err)return callback(err);
-		doc=normalizeReportData(doc);
-		doc.normalized=1;
-		db.save(id,doc, callback);
+		db.save(id,normalizeReportData(doc), callback);
 	});
 }
 exports.getSavedReportList=function(url, callback){
