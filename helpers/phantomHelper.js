@@ -150,7 +150,7 @@ exports.getSavedReport=function(id, callback){
 				normDoc=normalizeReportData(doc);
 				exports.saveReport(id, normDoc);
 			}*/
-			callback(null, normalizeReportData(doc));
+			callback(null, doc);
 		}
 	});
 }
