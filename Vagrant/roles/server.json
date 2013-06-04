@@ -1,0 +1,23 @@
+{
+	"name": "server",
+	"description": "",
+	"json_class": "Chef::Role",
+	"chef_type": "role",
+	"default_attributes": {},
+    "override_attributes": {
+    	 "nodejs" : {
+            "install_method":"binary",
+            "version":"0.10.6"
+          }
+    },
+	"run_list": [
+	 	"recipe[build-essential]",
+	 	"recipe[git]",
+		"recipe[apt]",
+		"recipe[phantomjs_flash]",
+		"recipe[nodejs]",
+		"recipe[nodejs::npm]",
+		"recipe[npm]",
+		"recipe[node_modules]"
+	]
+}
