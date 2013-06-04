@@ -40,8 +40,8 @@ app.get('/speedreport/report', speedreport.report);
 app.get('/speedreport/data', speedreport.data);
 app.get('/speedreport/list', speedreport.list);
 app.get('/speedreport/list/data', speedreport.list);
-app.get('/speedreport/compare', speedreport.compare);
-app.get('/speedreport/compare/data', speedreport.compare);
+app.get('/speedreport/compare', speedreport.aggregate);
+app.get('/speedreport/compare/data', speedreport.aggregate);
 //app.get('/speedreport/data2', speedreport.stream);
 //loadreport
 app.get('/loadreport/', loadreport.index);

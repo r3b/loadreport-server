@@ -50,53 +50,100 @@ db.exists(function (err, exists) {
 			map: function (doc) {
 			  if (!doc.normalized || doc.normalized<1) emit(doc.id, doc.id);
 			}
+		},
+		byDistinctURL:{
+			map: function (doc) {
+			  if (doc.url) {
+			  	var date = new Date(doc.requestTime);
+			  	var newDoc={
+					duration:doc.duration||0,
+					blocked:doc.blocked||0,
+					latency:doc.latency||0,
+					downloadTime:doc.downloadTime||0,
+					lifetime:doc.lifetime||0,
+					assetCount:doc.assetCount||0
+				};
+			  	emit([doc.url,date.getFullYear(),date.getMonth(),date.getDate(), date.getHours(), date.getMinutes()], newDoc);
+			  }
+			},
+			reduce: function (key, values, rereduce) {
+				var count=values.length,
+					combined=values.reduce(function(p,c,i,a){
+						p.duration+=c.duration;
+						p.blocked+=c.blocked;
+						p.latency+=c.latency;
+						p.downloadTime+=c.downloadTime;
+						p.lifetime+=c.lifetime;
+						p.assetCount+=c.assetCount;
+						return p;
+				    }, {
+						duration:0,
+						blocked:0,
+						latency:0,
+						downloadTime:0,
+						lifetime:0,
+						assetCount:0
+					});
+			    return {
+					duration:(combined.duration /count),
+					blocked:(combined.blocked /count),
+					latency:(combined.latency /count),
+					downloadTime:(combined.downloadTime /count),
+					lifetime:(combined.lifetime /count),
+					assetCount:(combined.assetCount /count)
+				};
+			}
 		}
 	});
 });
-function normalizeReportData(data){
-	data.duration=data.responseTime-data.requestTime;
-	data.blocked=0;
-	data.latency=0;
-	data.downloadTime=0;
-	data.lifetime=0;
-	data.pageLifetime=0;
-	data.assetCount=data.assets.length;
-	data.mimeTypes={};
-	data.mimeGroups={};
-	data.stacked=[];
-	data.stackedProperties=['Blocking', 'Latency', 'Download time', 'Lifetime'];
-	data.stackedColors=['steelblue', 'yellow', 'red', 'green'];
-	data.assets.forEach(function(asset){
-		asset.request.time=Date.parse(asset.request.time);
-		asset.response.time=Date.parse(asset.response.time);
-		asset.response.received=Date.parse(asset.response.received);
-		asset.blocked=asset.request.time-data.requestTime;
-		asset.latency=asset.response.received-asset.request.time;
-		asset.latencyStacked=asset.blocked+asset.latency;
-		asset.downloadTime=asset.response.time-asset.response.received;
-		asset.downloadTimeStacked=asset.latencyStacked+asset.downloadTime;
-		asset.lifetime=asset.response.time-asset.request.time;
-		asset.pageLifetime=asset.response.time-data.requestTime;
-		asset.stacked=[asset.blocked,asset.latencyStacked,asset.downloadTimeStacked, asset.pageLifetime];
-		asset.mimeType=asset.response.contentType;
-		if(asset.mimeType.indexOf(';')!==-1){
-			asset.mimeType=asset.response.contentType.substring(0,asset.response.contentType.indexOf(';'));
-		}
-		asset.mimeGroup=asset.mimeType.substring(0,asset.mimeType.indexOf('/'));
-		data.blocked+=asset.blocked;
-		data.latency+=asset.latency;
-		data.downloadTime+=asset.downloadTime;
-		data.lifetime+=asset.lifetime;
-		data.pageLifetime+=asset.pageLifetime;
-		data.stacked.push(asset.stacked);
-		if(asset.mimeType in data.mimeTypes){
-			data.mimeTypes[asset.mimeType].push(asset);
-		}else{
-			data.mimeTypes[asset.mimeType]=[asset];
-		}
-	})
-	data.normalized=1;
-	return data;
+function normalizeReportData(data, callback){
+	try{
+		data.duration=data.responseTime-data.requestTime;
+		data.blocked=0;
+		data.latency=0;
+		data.downloadTime=0;
+		data.lifetime=0;
+		data.pageLifetime=0;
+		data.assetCount=data.assets.length;
+		data.mimeTypes={};
+		data.mimeGroups={};
+		data.stacked=[];
+		data.stackedProperties=['Blocking', 'Latency', 'Download time', 'Lifetime'];
+		data.stackedColors=['steelblue', 'yellow', 'red', 'green'];
+		data.assets.forEach(function(asset){
+			asset.request.time=Date.parse(asset.request.time);
+			asset.response.time=Date.parse(asset.response.time);
+			asset.response.received=Date.parse(asset.response.received);
+			asset.blocked=asset.request.time-data.requestTime;
+			asset.latency=asset.response.received-asset.request.time;
+			asset.latencyStacked=asset.blocked+asset.latency;
+			asset.downloadTime=asset.response.time-asset.response.received;
+			asset.downloadTimeStacked=asset.latencyStacked+asset.downloadTime;
+			asset.lifetime=asset.response.time-asset.request.time;
+			asset.pageLifetime=asset.response.time-data.requestTime;
+			asset.stacked=[asset.blocked,asset.latencyStacked,asset.downloadTimeStacked, asset.pageLifetime];
+			asset.mimeType=asset.response.contentType;
+			if(asset.mimeType.indexOf(';')!==-1){
+				asset.mimeType=asset.response.contentType.substring(0,asset.response.contentType.indexOf(';'));
+			}
+			asset.mimeGroup=asset.mimeType.substring(0,asset.mimeType.indexOf('/'));
+			data.blocked+=asset.blocked;
+			data.latency+=asset.latency;
+			data.downloadTime+=asset.downloadTime;
+			data.lifetime+=asset.lifetime;
+			data.pageLifetime+=asset.pageLifetime;
+			data.stacked.push(asset.stacked);
+			if(asset.mimeType in data.mimeTypes){
+				data.mimeTypes[asset.mimeType].push(asset);
+			}else{
+				data.mimeTypes[asset.mimeType]=[asset];
+			}
+		})
+		data.normalized=1;
+	}catch(e){
+		return callback(e, null);
+	}
+	return callback(null, data);
 }
 
 exports.speedReport=function(url,task,contentType, callback){
@@ -104,71 +151,53 @@ exports.speedReport=function(url,task,contentType, callback){
 	contentType=contentType||'json';
 	var childArgs = [SPEED_REPORT_PATH, url];
 	// Process the data (note: error handling omitted)
-		temp.open('speedreport-', function(err, info) {
-		  if(err) return callback(err, null);
-		  	childArgs.push(info.path);
-			console.log("running \"%s\"", childArgs);
-			childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
-				if(err) return callback(err, null);
-				process.nextTick(function(){
-					fs.readFile(info.path, function (err, data) {
-					  if (err) return callback(err, null);
-						if(data){
-							var obj;
-							try{
-								obj=normalizeReportData(JSON.parse(data.toString()));
-							}catch(e){
-								console.error("unable to parse JSON data", e);
-								console.dir(data)
-								return callback(e, null);
-							}
-							db.save(obj, function (err, res) {
-								if (err) {
-									console.error("there was an error saving the data", err);
-									return callback(err, null);
-								} else {
-									console.log("data was saved successfully", res);
-									return callback(null, res);
-								}
+	temp.open('speedreport-', function(err, info) {
+	  if(err) return callback(err, null);
+	  	childArgs.push(info.path);
+		console.log("running \"%s\"", childArgs);
+		childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
+			if(err) return callback(err, null);
+			process.nextTick(function(){
+				fs.readFile(info.path, function (err, data) {
+					if (err) return callback(err, null);
+					if(data){
+						try{
+							normalizeReportData(JSON.parse(data.toString()),function(err, data){
+								db.save(data, function (err, res) {
+									if (err) {
+										console.error("there was an error saving the data", err);
+										return callback(err, null);
+									} else {
+										console.log("data was saved successfully", res);
+										return callback(null, res);
+									}
+								});
 							});
-						}else{
-							console.error("our data object is empty!");
-							return callback(new Error("the created object was empty"), null);
+
+						}catch(e){
+							console.error("unable to parse JSON data", e);
+							console.dir(data)
+							return callback(e, null);
 						}
-					});
-				})
+					}else{
+						console.error("our data object is empty!");
+						return callback(new Error("the created object was empty"), null);
+					}
+				});
 			})
-		});
+		})
+	});
 }
 
 exports.getSavedReport=function(id, callback){
 	db.get(id, function (err, doc) {
-		if(err){
-			callback(err, null);
-		}else{
-			/*var normDoc=doc;
-			if(!normDoc.normalized || normDoc.normalized<1){
-				normDoc=normalizeReportData(doc);
-				exports.saveReport(id, normDoc);
-			}*/
-			callback(null, doc);
-		}
-	});
-}
-exports.saveReport=function(id,doc, callback){
-	db.save(id,doc, callback);
-}
-exports.updateSavedReport=function(id,callback){
-	db.get(id, function (err, doc) {
-		if(err)return callback(err);
-		db.save(id,normalizeReportData(doc), callback);
+		callback(err, doc);
 	});
 }
 exports.getSavedReportList=function(url, callback){
 	var options={};
 	if(url)options.key=url;
 	db.view('tests/byURL', options, function (err, doc) {
-      //console.dir(doc);
 		if(err){
 			callback(err, null);
 		}else{
@@ -176,11 +205,17 @@ exports.getSavedReportList=function(url, callback){
 		}
   });
 }
-exports.getUnnormalizedReportList=function(url, callback){
-	var options={};
-	if(url)options.key=url;
-	db.view('tests/unnormalized', options, function (err, doc) {
-      //console.dir(doc);
+exports.getSavedReportListAggregate=function(url, depth, callback){
+	var options={
+		group: true,
+		reduce: true,
+		group_level: depth||3
+	}
+	if(url){
+	  options.startkey= [url];
+	  options.endkey= [url, '\u9999'];
+	}
+	db.view('tests/byDistinctURL', options, function (err, doc) {
 		if(err){
 			callback(err, null);
 		}else{
