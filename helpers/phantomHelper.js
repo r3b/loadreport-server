@@ -119,6 +119,7 @@ exports.speedReport=function(url,task,contentType, callback){
 								obj=normalizeReportData(JSON.parse(data.toString()));
 							}catch(e){
 								console.error("unable to parse JSON data", e);
+								console.dir(data)
 								return callback(e, null);
 							}
 							db.save(obj, function (err, res) {
