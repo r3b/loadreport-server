@@ -14,7 +14,13 @@ Vagrant::Config.run do |config|
     config.vm.provision :chef_solo do |chef|
         chef.roles_path = "./roles"
         chef.add_role("db")
+    end
+    config.vm.provision :chef_solo do |chef|
+        chef.roles_path = "./roles"
         chef.add_role("mq")
+    end
+    config.vm.provision :chef_solo do |chef|
+        chef.roles_path = "./roles"
         chef.add_role("server")
     end
 end
