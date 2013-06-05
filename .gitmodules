@@ -22,3 +22,6 @@
 [submodule "Vagrant/cookbooks/apt"]
 	path = Vagrant/cookbooks/apt
 	url = https://github.com/opscode-cookbooks/apt.git
+[submodule "Vagrant/cookbooks/magic_shell"]
+	path = Vagrant/cookbooks/magic_shell
+	url = https://github.com/customink-webops/magic_shell.git

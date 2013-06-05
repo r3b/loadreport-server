@@ -14,7 +14,6 @@
 	 	"recipe[build-essential]",
 	 	"recipe[git]",
 		"recipe[apt]",
-		"recipe[phantomjs_flash]",
 		"recipe[nodejs]",
 		"recipe[nodejs::npm]",
 		"recipe[npm]",
