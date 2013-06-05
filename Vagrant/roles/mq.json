@@ -6,6 +6,11 @@
 	"default_attributes": {},
     "override_attributes": {},
 	"run_list": [
+		"recipe[magic_shell]",
+		"recipe[phantomjs_flash]",
+		"recipe[nodejs]",
+		"recipe[nodejs::npm]",
+		"recipe[npm]",
 		"recipe[rabbitmq]"
 	]
 }
