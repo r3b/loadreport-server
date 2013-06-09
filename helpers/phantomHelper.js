@@ -17,7 +17,7 @@ console.log('couchdb host is %s',db_url.href);
 var conn = new(cradle.Connection)(db_url.hostname, 443, {
 			secure: true,
 			cache: true,
-    		raw: false,
+			raw: false,
 			auth: { username: username, password: password }
 		})
 	, db = conn.database('speedreport')
@@ -36,9 +36,66 @@ db.exists(function (err, exists) {
 	}
 	console.log('creating design docs');
 	db.save('_design/tests', {
-		all: {
+		normal: {
 			map: function (doc) {
-			  if (doc.url) emit(doc.url, doc);
+
+			  if (doc.url) {
+			  	try{
+  					doc.warnings=[];
+  					doc.duration=doc.responseTime-doc.requestTime;
+  					doc.blocked=0;
+  					doc.latency=0;
+  					doc.downloadTime=0;
+  					doc.lifetime=0;
+  					doc.pageLifetime=0;
+  					doc.assetCount=doc.assets.length;
+  					doc.mimeTypes={};
+  					doc.mimeGroups={};
+  					doc.stacked=[];
+  					doc.stackedProperties=['Blocking', 'Latency', 'Download time', 'Lifetime'];
+  					doc.stackedColors=['steelblue', 'yellow', 'red', 'green'];
+  					doc.assets.forEach(function(asset){
+  						asset.request.time=Date.parse(asset.request.time);
+  						asset.response.time=Date.parse(asset.response.time);
+  						asset.response.received=Date.parse(asset.response.received);
+  						asset.blocked=asset.request.time-doc.requestTime;
+  						asset.latency=asset.response.received-asset.request.time;
+  						asset.latencyStacked=asset.blocked+asset.latency;
+  						asset.downloadTime=asset.response.time-asset.response.received;
+  						asset.downloadTimeStacked=asset.latencyStacked+asset.downloadTime;
+  						asset.lifetime=asset.response.time-asset.request.time;
+  						asset.pageLifetime=asset.response.time-doc.requestTime;
+  						asset.stacked=[asset.blocked,asset.latencyStacked,asset.downloadTimeStacked, asset.pageLifetime];
+  						asset.mimeType=asset.response.contentType;
+  						if(asset.mimeType.indexOf(';')!==-1){
+  							asset.mimeType=asset.response.contentType.substring(0,asset.response.contentType.indexOf(';'));
+  						}
+  						asset.mimeGroup=asset.mimeType.substring(0,asset.mimeType.indexOf('/'));
+  						asset.isGzipped=false;
+  						asset.isCached=false;
+  						asset.response.headers.forEach(function(h){
+  							if(h.name==='Content-Encoding' && h.value==='gzip') asset.isGzipped=true;
+  							if(h.name==='Expires') {
+	  							try{
+	  								var d=Date.parse(h.value);
+	  							}catch(e){
+	  								doc.warnings("error processing Expires header for "+asset.request.url);
+	  							}
+  							}
+  							if(['Cache-Control','Expires'].indexOf(h.name)!== -1){
+  							  asset.isCached=true;
+  							}
+  						});
+  						if(asset.isGzipped && asset.mimeGroup==="image"){
+  							doc.warnings.push("gzipping already-compressed binary data is counter-productive: "+asset.request.url)
+  						}
+  					})
+  					doc.normalized=1;
+  				}catch(e){
+  					doc.error=e;
+  				}
+					emit(doc.url, doc);
+  				}
 			}
 		},
 		byURL:{
@@ -54,8 +111,8 @@ db.exists(function (err, exists) {
 		byDistinctURL:{
 			map: function (doc) {
 			  if (doc.url) {
-			  	var date = new Date(doc.requestTime);
-			  	var newDoc={
+				var date = new Date(doc.requestTime);
+				var newDoc={
 					duration:doc.duration||0,
 					blocked:doc.blocked||0,
 					latency:doc.latency||0,
@@ -63,7 +120,7 @@ db.exists(function (err, exists) {
 					lifetime:doc.lifetime||0,
 					assetCount:doc.assetCount||0
 				};
-			  	emit([doc.url,date.getFullYear(),date.getMonth(),date.getDate(), date.getHours(), date.getMinutes()], newDoc);
+				emit([doc.url,date.getFullYear(),date.getMonth(),date.getDate(), date.getHours(), date.getMinutes()], newDoc);
 			  }
 			},
 			reduce: function (key, values, rereduce) {
@@ -76,7 +133,7 @@ db.exists(function (err, exists) {
 						p.lifetime+=c.lifetime;
 						p.assetCount+=c.assetCount;
 						return p;
-				    }, {
+					}, {
 						duration:0,
 						blocked:0,
 						latency:0,
@@ -84,7 +141,7 @@ db.exists(function (err, exists) {
 						lifetime:0,
 						assetCount:0
 					});
-			    return {
+				return {
 					duration:(combined.duration /count),
 					blocked:(combined.blocked /count),
 					latency:(combined.latency /count),
@@ -96,6 +153,8 @@ db.exists(function (err, exists) {
 		}
 	});
 });
+  var headers=['Cache-Control','Expires'];
+
 function normalizeReportData(data, callback){
 	try{
 		data.duration=data.responseTime-data.requestTime;
@@ -127,12 +186,31 @@ function normalizeReportData(data, callback){
 				asset.mimeType=asset.response.contentType.substring(0,asset.response.contentType.indexOf(';'));
 			}
 			asset.mimeGroup=asset.mimeType.substring(0,asset.mimeType.indexOf('/'));
+			asset.isGzipped=false;
+			asset.isCached=false;
+			asset.response.headers.forEach(function(h){
+				if(h.name==='Content-Encoding' && h.value==='gzip') asset.isGzipped=true;
+				if(h.name==='Expires') {
+					try{
+						var d=Date.parse(h.value);
+					}catch(e){
+						doc.warnings("error processing Expires header for "+asset.request.url);
+					}
+				}
+				if(headers.indexOf(h.name)!== -1){
+				  asset.isCached=true;
+				}
+			});
+			if(asset.isGzipped && asset.mimeGroup==="image"){
+				doc.warnings.push("gzipping already-compressed binary data is counter-productive: "+asset.request.url)
+			}
+
 			data.blocked+=asset.blocked;
 			data.latency+=asset.latency;
 			data.downloadTime+=asset.downloadTime;
 			data.lifetime+=asset.lifetime;
 			data.pageLifetime+=asset.pageLifetime;
-			data.stacked.push(asset.stacked);
+			//data.stacked.push(asset.stacked);
 			if(asset.mimeType in data.mimeTypes){
 				data.mimeTypes[asset.mimeType].push(asset);
 			}else{
@@ -145,7 +223,7 @@ function normalizeReportData(data, callback){
 	}
 	return callback(null, data);
 }
-
+exports.normalizeReportData=normalizeReportData;
 exports.speedReport=function(url,task,contentType, callback){
 	task=task||'performance';
 	contentType=contentType||'json';
@@ -153,7 +231,7 @@ exports.speedReport=function(url,task,contentType, callback){
 	// Process the data (note: error handling omitted)
 	temp.open('speedreport-', function(err, info) {
 	  if(err) return callback(err, null);
-	  	childArgs.push(info.path);
+		childArgs.push(info.path);
 		console.log("running \"%s\"", childArgs);
 		childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
 			if(err) return callback(err, null);
@@ -198,6 +276,17 @@ exports.getSavedReportList=function(url, callback){
 	var options={};
 	if(url)options.key=url;
 	db.view('tests/byURL', options, function (err, doc) {
+		if(err){
+			callback(err, null);
+		}else{
+			callback(null, doc);
+		}
+  });
+}
+exports.getSavedReportListVerbose=function(url, callback){
+	var options={limit:3};
+	if(url)options.key=url;
+	db.view('tests/normal', options, function (err, doc) {
 		if(err){
 			callback(err, null);
 		}else{
