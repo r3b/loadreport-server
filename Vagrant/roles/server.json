@@ -14,9 +14,10 @@
 	 	"recipe[build-essential]",
 	 	"recipe[git]",
 		"recipe[apt]",
-		"recipe[nodejs]",
+		"recipe[nodejs::install_from_binary]",
 		"recipe[nodejs::npm]",
 		"recipe[npm]",
-		"recipe[node_modules]"
+		"recipe[loadreport::default]",
+		"recipe[loadreport::web]"
 	]
 }

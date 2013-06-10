@@ -11,18 +11,24 @@ var childProcess = require('child_process')
 	, util = require('util')
 	, cradle = require('cradle')
 	, Url = require("url")
-	, db_url=Url.parse(process.env.CLOUDANT_URL||'https://app15424114.heroku:ys8YAkD1RhvAoPRq5lyS73cQ@app15424114.heroku.cloudant.com')
-	, auth=db_url.auth.split(':')
+//	, db_url=Url.parse(process.env.CLOUDANT_URL||'https://app15424114.heroku:ys8YAkD1RhvAoPRq5lyS73cQ@app15424114.heroku.cloudant.com')
+	, db_url=Url.parse(process.env.CLOUDANT_URL||'http://10.11.14.3')
+	, db_port=5984
+	, auth=(db_url.auth)?db_url.auth.split(':'):''
 	, username=auth[0]||''
 	, password=auth[1]||''
-	;
-console.log('couchdb host is %s',db_url.href);
-var conn = new(cradle.Connection)(db_url.hostname, 443, {
-			secure: true,
+	, cradle_opts={
 			cache: true,
-    		raw: false,
-			auth: { username: username, password: password }
-		})
+			raw: false
+		}
+;
+if(auth!==''){
+	cradle_opts.secure=true;
+	cradle_opts.auth={ username: username, password: password };
+	db_port=443;
+}
+console.log('couchdb host is %s',db_url.href, cradle_opts);
+var conn = new(cradle.Connection)(db_url.hostname, db_port, cradle_opts)
 	, db = conn.database('loadreport')
 ;
 db.exists(function (err, exists) {
