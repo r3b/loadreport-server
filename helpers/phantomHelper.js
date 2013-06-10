@@ -216,7 +216,7 @@ function normalizeReportData(data, callback){
 			data.downloadTime+=asset.downloadTime;
 			data.lifetime+=asset.lifetime;
 			data.pageLifetime+=asset.pageLifetime;
-			//data.stacked.push(asset.stacked);
+			data.stacked.push(asset.stacked);
 			if(asset.mimeType in data.mimeTypes){
 				data.mimeTypes[asset.mimeType].push(asset);
 			}else{
