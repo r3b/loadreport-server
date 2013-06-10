@@ -2,40 +2,45 @@
 # vi: set ft=ruby :
 
 Vagrant::Config.run do |config|
-    config.vm.box = "lucid32"
-    config.vm.box_url = "http://files.vagrantup.com/lucid32.box"
-    config.vm.network :bridged
-    config.vm.share_folder "app", "/home/vagrant/app", "../"
-    # allow for symlinks in the app folder
-    config.vm.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/app", "1"]
-    config.vm.forward_port 8080, 8080
-    config.vm.provision :chef_solo do |chef|
-        chef.roles_path = "./roles"
-        chef.add_role("server")
+    config.vm.define :db do |db_config|
+        db_config.vm.box = "lucid32"
+        db_config.vm.box_url = "http://files.vagrantup.com/lucid32.box"
+        db_config.vm.network :hostonly, "10.11.14.3"
+        db_config.vm.share_folder "app", "/home/vagrant/app", "../"
+        # allow for symlinks in the app folder
+        db_config.vm.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/app", "1"]
+        #db_config.vm.forward_port 5984, 5984
+        #db_config.vm.provision :shell, :path => "scripts/provision.sh"
+        db_config.vm.provision :chef_solo do |chef|
+            chef.roles_path = "./roles"
+            chef.add_role("db")
+        end
     end
-end
-Vagrant::Config.run do |config|
-    config.vm.box = "lucid32"
-    config.vm.box_url = "http://files.vagrantup.com/lucid32.box"
-    config.vm.network :bridged
-    config.vm.share_folder "app", "/home/vagrant/app", "../"
-    # allow for symlinks in the app folder
-    config.vm.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/app", "1"]
-    config.vm.forward_port 5984, 5984
-    #config.vm.provision :shell, :path => "scripts/provision.sh"
-    config.vm.provision :chef_solo do |chef|
-        chef.roles_path = "./roles"
-        chef.add_role("db")
+    config.vm.define :queue do |queue_config|
+        queue_config.vm.box = "lucid32"
+        queue_config.vm.box_url = "http://files.vagrantup.com/lucid32.box"
+        queue_config.vm.network :hostonly, "10.11.14.2"
+        queue_config.vm.share_folder "app", "/home/vagrant/app", "../"
+        #queue_config.vm.forward_port 5672, 5672
+        queue_config.vm.provision :chef_solo do |chef|
+            chef.roles_path = "./roles"
+            chef.add_role("mq")
+        end
     end
-end
-Vagrant::Config.run do |config|
-    config.vm.box = "lucid32"
-    config.vm.box_url = "http://files.vagrantup.com/lucid32.box"
-    config.vm.network :bridged
-    config.vm.forward_port 5672, 5672
-    config.vm.provision :chef_solo do |chef|
-        chef.roles_path = "./roles"
-        chef.add_role("mq")
+    config.vm.define :web do |web_config|
+        web_config.vm.box = "web"
+        web_config.vm.forward_port 3000, 3000
+        #web_config.vm.forward_port 8080, 8080
+        web_config.vm.box = "lucid32"
+        web_config.vm.box_url = "http://files.vagrantup.com/lucid32.box"
+        web_config.vm.network :hostonly, "10.11.14.1"
+        web_config.vm.share_folder "app", "/home/vagrant/app", "../"
+        # allow for symlinks in the app folder
+        web_config.vm.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/app", "1"]
+        web_config.vm.provision :chef_solo do |chef|
+            chef.roles_path = "./roles"
+            chef.add_role("server")
+        end
     end
 end
 #http://www.opscode.com/blog/wp-content/uploads/2012/02/automate-all-the-things.png

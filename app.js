@@ -1,8 +1,3 @@
-//nodefly integration
-require('nodefly').profile(
-    process.env.NODEFLY_APPLICATION_KEY,
-    [process.env.APPLICATION_NAME,'loadreport']
-);
 /**
  * Module dependencies.
  */

@@ -4,13 +4,21 @@
 	"json_class": "Chef::Role",
 	"chef_type": "role",
 	"default_attributes": {},
-    "override_attributes": {},
+    "override_attributes": {
+    	"nodejs":{
+            "install_method":"binary",
+            "version":"0.10.6"
+    	}
+    },
 	"run_list": [
-		"recipe[magic_shell]",
-		"recipe[phantomjs_flash]",
-		"recipe[nodejs]",
+	 	"recipe[git]",
+		"recipe[apt]",
+		"recipe[nodejs::install_from_binary]",
 		"recipe[nodejs::npm]",
 		"recipe[npm]",
-		"recipe[rabbitmq]"
+		"recipe[rabbitmq]",
+		"recipe[loadreport::default]",
+		"recipe[loadreport::xvfb]",
+		"recipe[loadreport::worker]"
 	]
 }
