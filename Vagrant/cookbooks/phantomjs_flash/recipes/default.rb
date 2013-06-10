@@ -7,7 +7,19 @@
 # All rights reserved - Do Not Redistribute
 #
 include_recipe "apt"
-include_recipe "git"
+#apt_repository "restricted" do
+#  uri "http://us.archive.ubuntu.com/ubuntu/"
+#  components ["lucid", "restricted", "multiverse"]
+#end
+#apt_repository "extras" do
+#  uri "http://extras.ubuntu.com/ubuntu"
+#  components ["lucid", "main"]
+#end
+#apt_repository "partners" do
+#  uri "http://archive.canonical.com/"
+#  components ["lucid", "partner"]
+#  notifies :run, resources(:execute => "apt-get update"), :immediately
+#end
 
 %w{build-essential g++ openssl chrpath libssl-dev libfontconfig1-dev xvfb 
 	libglib2.0-dev libx11-dev libxext-dev libfreetype6-dev libxcursor-dev 
