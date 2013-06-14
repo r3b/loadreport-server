@@ -3,7 +3,8 @@
  * GET home page.
  */
 
-var childProcess = require('child_process')
+var configs = require('../config')
+	, childProcess = require('child_process')
 	, phantomjs = require('phantomjs')
 	, phantom = require('phantom')
 	, binPath = phantomjs.path
@@ -14,7 +15,7 @@ var childProcess = require('child_process')
 	, phelper=require('../helpers/phantomHelper.js')
 	, uuid = require('node-uuid')
 	;
-  var url = process.env.CLOUDAMQP_URL || "amqp://localhost"; // default to localhost
+  var url = process.env.CLOUDAMQP_URL || process.env.AMQP_URL; // default to localhost
   var amqp = require('amqp');
   var uuid = require('node-uuid');
   //Connect to RabbitMQ and get reference to the connection.
