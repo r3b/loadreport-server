@@ -2,7 +2,8 @@
 /*
  * GET home page.
  */
-var childProcess = require('child_process')
+var configs = require('../config')
+	, childProcess = require('child_process')
 	, phantomjs = require('phantomjs')
 	, binPath = phantomjs.path
 	, path = require('path')
@@ -11,9 +12,8 @@ var childProcess = require('child_process')
 	, util = require('util')
 	, cradle = require('cradle')
 	, Url = require("url")
-//	, db_url=Url.parse(process.env.CLOUDANT_URL||'https://app15424114.heroku:ys8YAkD1RhvAoPRq5lyS73cQ@app15424114.heroku.cloudant.com')
-	, db_url=Url.parse(process.env.CLOUDANT_URL||'http://localhost')
-	, db_port=5984
+	, db_url=Url.parse(process.env.CLOUDANT_URL||process.env.COUCH_URL)
+	, db_port=process.env.COUCH_PORT
 	, auth=(db_url.auth)?db_url.auth.split(':'):''
 	, username=auth[0]||''
 	, password=auth[1]||''
