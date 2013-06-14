@@ -14,7 +14,7 @@ var childProcess = require('child_process')
 	, phelper=require('../helpers/phantomHelper.js')
 	, uuid = require('node-uuid')
 	;
-  var url = process.env.CLOUDAMQP_URL || "amqp://10.11.14.2"; // default to localhost
+  var url = process.env.CLOUDAMQP_URL || "amqp://localhost"; // default to localhost
   var amqp = require('amqp');
   var uuid = require('node-uuid');
   //Connect to RabbitMQ and get reference to the connection.

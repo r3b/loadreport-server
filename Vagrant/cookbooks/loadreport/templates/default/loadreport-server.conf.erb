@@ -5,4 +5,4 @@ stop on [06]
 
 respawn
 
-exec start-stop-daemon --start -c vagrant --exec /usr/local/bin/node /home/vagrant/app/app.js > /var/log/loadreport_web.log 2>&1
+exec /usr/local/bin/node /home/vagrant/app/app.js > /var/log/loadreport_web.log 2>&1

@@ -1,6 +1,6 @@
 var amqp = require('amqp');
 var uuid = require('node-uuid');
-var url = process.env.CLOUDAMQP_URL || "amqp://10.11.14.2"; // default to localhost
+var url = process.env.CLOUDAMQP_URL || "amqp://localhost"; // default to localhost
 var reqQueue = 'speedreport-request';
 var replyQueue = 'speedreport-request';
 var connection = amqp.createConnection({url: url}); // create the connection
