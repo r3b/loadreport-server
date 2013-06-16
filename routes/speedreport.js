@@ -24,8 +24,6 @@ var configs = require('../config')
   var broker={};
 console.log('AMQP url: %s',url);
 connection.on('ready', function () {
-      //chatExchange = connection.exchange('chatExchange', {'type': 'fanout'});
-      //chatExchange.publish('', 'blah');
       connection.queue('reports-reply', function (q) {
       	replyQueue=q;
         q.bind("#");
@@ -72,13 +70,13 @@ exports.report = function(req, res){
 	var url=req.param('url')
 		, id=req.param('id');
     if(id){
-		res.render('speedreport_d3', {
+		res.render('speedreport', {
 			id: id
 			, url: url
 			, barWidth: '4px'
 		});
 	}else if(url){
-		res.render('speedreport_d3', {
+		res.render('speedreport', {
 			url: url
 			, barWidth: '4px'
 		});
