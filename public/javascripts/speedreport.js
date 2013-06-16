@@ -42,7 +42,7 @@ page.open(address, function (status) {
     } else {
         t = Date.now() - t;
         try {
-            var data=JSON.stringify(pageInfo)
+            var data=JSON.stringify(pageInfo, undefined, 4)
             printToFile(data);
         }catch(e){
             console.error("error writing to file ",e);
@@ -82,6 +82,27 @@ function printToFile(data) {
 
     } catch (e) {
         console.error("problem writing to file",e);
+    }
+    try {
+		myfile = 'speedreports/' + fileid + '.' + extension;
+		if(fs.exists(myfile)){
+		    fs.remove(myfile);
+		}
+        if(!fs.exists('speedreport.html')){
+            html = fs.read('loadreport/speedreport.html');
+        }else{
+            html = fs.read('speedreport.html');
+        }
+        if(phantom.args[1]){
+            html=html.replace('{{REPORT_DATA_URI}}', '\/rest\/performance\/js\?uuid\=' + myjson);
+        }else{
+            html=html.replace('{{REPORT_DATA_URI}}', myjson+'.js');
+        }
+        html=html.replace('{{url}}', phantom.args[0]);
+        f.writeLine(html);
+        f.close();
+    } catch (e) {
+        console.log("problem writing to file",e);
     }
 
 }
