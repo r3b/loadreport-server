@@ -1,25 +1,30 @@
 var childProcess = require('child_process')
-	, phantomjs = require('phantomjs')
-	, binPath = phantomjs.path
+	, binPath = require("phantomjs").path
 	, path = require('path')
 	, fs= require('fs')
 	, cradle = require('cradle')
 	, Url = require("url")
-	, db_url=Url.parse(process.env.CLOUDANT_URL||'https://app15424114.heroku:ys8YAkD1RhvAoPRq5lyS73cQ@app15424114.heroku.cloudant.com')
-	, auth=db_url.auth.split(':')
-	, username=auth[0]||''
-	, password=auth[1]||''
+	, db_url=Url.parse(process.env.CLOUDANT_URL||process.env.COUCH_URL)
+	, db_port=process.env.COUCH_PORT
 	, temp = require('temp')
 	, util = require('util')
-	, SPEED_REPORT_PATH=path.join(__dirname, '/../public/javascripts/speedreport.js');
+	, SPEED_REPORT_PATH=path.join(__dirname, '/../public/javascripts/speedreport.js')
 
-console.log('couchdb host is %s',db_url.href);
-var conn = new(cradle.Connection)(db_url.hostname, 443, {
-			secure: true,
+	, auth=(db_url.auth)?db_url.auth.split(':'):''
+	, username=auth[0]||''
+	, password=auth[1]||''
+	, cradle_opts={
 			cache: true,
-			raw: false,
-			auth: { username: username, password: password }
-		})
+			raw: false
+		}
+;
+if(auth!==''){
+	cradle_opts.secure=true;
+	cradle_opts.auth={ username: username, password: password };
+	db_port=443;
+}
+console.log('couchdb host is %s',db_url.href);
+var conn = new(cradle.Connection)(db_url.hostname, db_port, cradle_opts)
 	, db = conn.database('speedreport')
 ;
 db.exists(function (err, exists) {
@@ -223,17 +228,28 @@ function normalizeReportData(data, callback){
 	}
 	return callback(null, data);
 }
+fs.exists("/home/vagrant/app/bin/phantomjs--linux-i686/bin/phantomjs", function (exists) {
+	if(exists){
+		binPath="/home/vagrant/app/bin/phantomjs--linux-i686/bin/phantomjs";
+	}
+	console.log("binPath", binPath);
+});
+exports.phantomjs_path=binPath;
 exports.normalizeReportData=normalizeReportData;
+exports.getDatabaseHandle=function(){
+	return db;
+}
 exports.speedReport=function(url,task,contentType, callback){
 	task=task||'performance';
 	contentType=contentType||'json';
-	var childArgs = [SPEED_REPORT_PATH, url];
+	var childArgs = ["export DISPLAY=:99.0 &&", binPath, "--load-plugins=true", SPEED_REPORT_PATH, url];
 	// Process the data (note: error handling omitted)
 	temp.open('speedreport-', function(err, info) {
+	  if(err) console.error(err);
 	  if(err) return callback(err, null);
 		childArgs.push(info.path);
-		console.log("running \"%s\"", childArgs);
-		childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
+		console.log("running \"%s\"", childArgs.join(' '));
+		childProcess.exec(childArgs.join(' '), function(err, stdout, stderr) {
 			if(err) return callback(err, null);
 			process.nextTick(function(){
 				fs.readFile(info.path, function (err, data) {

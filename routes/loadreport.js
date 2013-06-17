@@ -2,27 +2,33 @@
 /*
  * GET home page.
  */
-var childProcess = require('child_process')
-	, phantomjs = require('phantomjs')
-	, binPath = phantomjs.path
+var configs = require('../config')
+	, childProcess = require('child_process')
 	, path = require('path')
 	, fs= require('fs')
 	, temp = require('temp')
 	, util = require('util')
 	, cradle = require('cradle')
 	, Url = require("url")
-	, db_url=Url.parse(process.env.CLOUDANT_URL||'https://app15424114.heroku:ys8YAkD1RhvAoPRq5lyS73cQ@app15424114.heroku.cloudant.com')
-	, auth=db_url.auth.split(':')
+	, phelper=require('../helpers/phantomHelper.js')
+	, binPath = phelper.phantomjs_path
+	, db_url=Url.parse(process.env.CLOUDANT_URL||process.env.COUCH_URL)
+	, db_port=process.env.COUCH_PORT
+	, auth=(db_url.auth)?db_url.auth.split(':'):''
 	, username=auth[0]||''
 	, password=auth[1]||''
-	;
-console.log('couchdb host is %s',db_url.href);
-var conn = new(cradle.Connection)(db_url.hostname, 443, {
-			secure: true,
+	, cradle_opts={
 			cache: true,
-    		raw: false,
-			auth: { username: username, password: password }
-		})
+			raw: false
+		}
+;
+if(auth!==''){
+	cradle_opts.secure=true;
+	cradle_opts.auth={ username: username, password: password };
+	db_port=443;
+}
+console.log('couchdb host is %s',db_url.href, cradle_opts);
+var conn = new(cradle.Connection)(db_url.hostname, db_port, cradle_opts)
 	, db = conn.database('loadreport')
 ;
 db.exists(function (err, exists) {
@@ -45,6 +51,15 @@ db.exists(function (err, exists) {
 		});
 	}
 });
+fs.exists("/home/vagrant/app/bin/phantomjs--linux-i686/bin/phantomjs", function (exists) {
+	if(exists){
+		binPath="/home/vagrant/app/bin/phantomjs--linux-i686/bin/phantomjs";
+	}else{
+		binPath=require("phantomjs").path;
+	}
+	console.log("binPath", binPath);
+});
+
 exports.index = function(req, res){
   res.render('index', { title: 'Load Report', path: '/loadreport/performance/json/data/' });
 };

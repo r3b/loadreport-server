@@ -3,10 +3,9 @@
  * GET home page.
  */
 
-var childProcess = require('child_process')
-	, phantomjs = require('phantomjs')
-	, phantom = require('phantom')
-	, binPath = phantomjs.path
+var configs = require('../config')
+	, childProcess = require('child_process')
+	//, binPath = require('phantomjs').path
 	, path = require('path')
 	, fs= require('fs')
 	, temp = require('temp')
@@ -14,7 +13,7 @@ var childProcess = require('child_process')
 	, phelper=require('../helpers/phantomHelper.js')
 	, uuid = require('node-uuid')
 	;
-  var url = process.env.CLOUDAMQP_URL || "amqp://localhost"; // default to localhost
+  var url = process.env.CLOUDAMQP_URL || process.env.AMQP_URL; // default to localhost
   var amqp = require('amqp');
   var uuid = require('node-uuid');
   //Connect to RabbitMQ and get reference to the connection.
@@ -23,8 +22,6 @@ var childProcess = require('child_process')
   var broker={};
 console.log('AMQP url: %s',url);
 connection.on('ready', function () {
-      //chatExchange = connection.exchange('chatExchange', {'type': 'fanout'});
-      //chatExchange.publish('', 'blah');
       connection.queue('reports-reply', function (q) {
       	replyQueue=q;
         q.bind("#");
@@ -71,15 +68,15 @@ exports.report = function(req, res){
 	var url=req.param('url')
 		, id=req.param('id');
     if(id){
-		res.render('speedreport_d3', {
+		res.render('../reports/speedreport', {
 			id: id
 			, url: url
-			, barWidth: '4px'
+			, barWidth: '3px'
 		});
 	}else if(url){
-		res.render('speedreport_d3', {
+		res.render('../reports/speedreport', {
 			url: url
-			, barWidth: '4px'
+			, barWidth: '3px'
 		});
 	}else{
 		res.redirect('/');
