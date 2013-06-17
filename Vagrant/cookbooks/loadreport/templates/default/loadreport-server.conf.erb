@@ -1,0 +1,8 @@
+description 'node_modules upstart script'
+author 'ryan.bridges <ryan.bridges@gmail.com>'
+
+stop on [06]
+
+respawn
+
+exec /usr/local/bin/node /home/vagrant/app/app.js > /var/log/loadreport_web.log 2>&1
