@@ -1,4 +1,4 @@
-phantomjs
+.vagrant
 node_modules/
 .gitignore
 .elasticbeanstalk/

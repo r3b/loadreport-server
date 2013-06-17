@@ -14,6 +14,7 @@ Vagrant::Config.run do |config|
         #web_config.vm.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/app", "1"]
         web_config.vm.provision :chef_solo do |chef|
             chef.roles_path = "./roles"
+            chef.cookbooks_path = "../cookbooks"
             chef.add_role("db")
             chef.add_role("mq")
             chef.add_role("server")
