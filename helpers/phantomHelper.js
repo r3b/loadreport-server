@@ -1,6 +1,5 @@
 var childProcess = require('child_process')
-	, phantomjs = require('phantomjs')
-	, binPath = phantomjs.path
+	, binPath = require("phantomjs").path
 	, path = require('path')
 	, fs= require('fs')
 	, cradle = require('cradle')
@@ -230,11 +229,12 @@ function normalizeReportData(data, callback){
 	return callback(null, data);
 }
 fs.exists("/home/vagrant/app/bin/phantomjs--linux-i686/bin/phantomjs", function (exists) {
-		if(exists){
-			binPath="/home/vagrant/app/bin/phantomjs--linux-i686/bin/phantomjs";
-		}
-		console.log("binPath", binPath);
-	});
+	if(exists){
+		binPath="/home/vagrant/app/bin/phantomjs--linux-i686/bin/phantomjs";
+	}
+	console.log("binPath", binPath);
+});
+exports.phantomjs_path=binPath;
 exports.normalizeReportData=normalizeReportData;
 exports.getDatabaseHandle=function(){
 	return db;

@@ -1,3 +1,6 @@
 [submodule "cookbooks"]
 	path = cookbooks
 	url = https://github.com/r3b/loadreport-cookbooks.git
+[submodule "reports"]
+	path = reports
+	url = https://github.com/r3b/loadreport.git

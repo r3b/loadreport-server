@@ -4,14 +4,14 @@
  */
 var configs = require('../config')
 	, childProcess = require('child_process')
-	, phantomjs = require('phantomjs')
-	, binPath = phantomjs.path
 	, path = require('path')
 	, fs= require('fs')
 	, temp = require('temp')
 	, util = require('util')
 	, cradle = require('cradle')
 	, Url = require("url")
+	, phelper=require('../helpers/phantomHelper.js')
+	, binPath = phelper.phantomjs_path
 	, db_url=Url.parse(process.env.CLOUDANT_URL||process.env.COUCH_URL)
 	, db_port=process.env.COUCH_PORT
 	, auth=(db_url.auth)?db_url.auth.split(':'):''
@@ -51,6 +51,15 @@ db.exists(function (err, exists) {
 		});
 	}
 });
+fs.exists("/home/vagrant/app/bin/phantomjs--linux-i686/bin/phantomjs", function (exists) {
+	if(exists){
+		binPath="/home/vagrant/app/bin/phantomjs--linux-i686/bin/phantomjs";
+	}else{
+		binPath=require("phantomjs").path;
+	}
+	console.log("binPath", binPath);
+});
+
 exports.index = function(req, res){
   res.render('index', { title: 'Load Report', path: '/loadreport/performance/json/data/' });
 };
