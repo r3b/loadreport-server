@@ -3,8 +3,8 @@
  */
 
 var express = require('express')
+  , cons = require('consolidate')
   , routes = require('./routes')
-  , user = require('./routes/user')
   , speedreport = require('./routes/speedreport')
   , loadreport = require('./routes/loadreport')
   , http = require('http')
@@ -14,8 +14,11 @@ var app = express();
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
+  app.engine('html', cons.hogan);
+
+  // set .html as the default extension 
+  app.set('view engine', 'html');
   app.set('views', __dirname + '/views');
-  app.set('view engine', 'hjs');
   app.use(express.favicon());
   app.use(express.logger('dev'));
   app.use(express.bodyParser());

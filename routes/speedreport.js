@@ -5,9 +5,7 @@
 
 var configs = require('../config')
 	, childProcess = require('child_process')
-	, phantomjs = require('phantomjs')
-	, phantom = require('phantom')
-	, binPath = phantomjs.path
+	//, binPath = require('phantomjs').path
 	, path = require('path')
 	, fs= require('fs')
 	, temp = require('temp')
@@ -70,15 +68,15 @@ exports.report = function(req, res){
 	var url=req.param('url')
 		, id=req.param('id');
     if(id){
-		res.render('speedreport', {
+		res.render('../reports/speedreport', {
 			id: id
 			, url: url
-			, barWidth: '4px'
+			, barWidth: '3px'
 		});
 	}else if(url){
-		res.render('speedreport', {
+		res.render('../reports/speedreport', {
 			url: url
-			, barWidth: '4px'
+			, barWidth: '3px'
 		});
 	}else{
 		res.redirect('/');
