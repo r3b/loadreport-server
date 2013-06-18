@@ -228,9 +228,9 @@ function normalizeReportData(data, callback){
 	}
 	return callback(null, data);
 }
-fs.exists("/home/vagrant/app/bin/phantomjs--linux-i686/bin/phantomjs", function (exists) {
+fs.exists("/opt/loadreport-server/bin/phantomjs--linux-i686/bin/phantomjs", function (exists) {
 	if(exists){
-		binPath="/home/vagrant/app/bin/phantomjs--linux-i686/bin/phantomjs";
+		binPath="/opt/loadreport-server/bin/phantomjs--linux-i686/bin/phantomjs";
 	}
 	console.log("binPath", binPath);
 });
