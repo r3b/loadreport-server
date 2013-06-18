@@ -6,9 +6,10 @@ Vagrant::Config.run do |config|
         web_config.vm.box = "web"
         web_config.vm.forward_port 3000, 3000
         #web_config.vm.forward_port 8080, 8080
-        web_config.vm.box = "lucid32"
-        web_config.vm.box_url = "http://files.vagrantup.com/lucid32.box"
-        web_config.vm.network :hostonly, "10.11.14.1"
+        web_config.vm.box = "loadreport"
+        #web_config.vm.box_url = "http://files.vagrantup.com/lucid32.box"
+        web_config.vm.box_url = "../../loadreport.box"
+        web_config.vm.network :hostonly, "10.11.14.4"
         web_config.vm.share_folder "app", "/home/vagrant/app", "../"
         web_config.vm.provision :chef_solo do |chef|
             chef.cookbooks_path = "../cookbooks"

@@ -18,9 +18,9 @@
 		"recipe[nodejs::npm]",
 		"recipe[npm]",
 		"recipe[rabbitmq]",
+		"recipe[loadreport::xvfb]",
 		"recipe[phantomjs_flash]",
 		"recipe[loadreport::default]",
-		"recipe[loadreport::xvfb]",
 		"recipe[loadreport::worker]"
 	]
 }
